@@ -1,6 +1,56 @@
 <!DOCTYPE html><html class="appearance-auto" lang="en"><head><meta charset="UTF-8"><title>Georgeqi's blog</title><meta name="description" content="The harder you work, the luckier you will be~"><meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, initial-scale=1"><!-- Google Analytics --><!-- End Google Analytics -->
 <!-- Baidu Analytics --><!-- End Baidu Analytics --><link rel="icon" href="/images/favicon.ico"><link rel="stylesheet" href="/style/common/bulma.css"><link rel="stylesheet" href="/style/base.css"><link rel="stylesheet" href="/style/common/helper.css"><script src="/js/common.js"></script><link rel="stylesheet" href="/style/widget-post-list.css"><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Georgeqi_Blog" type="application/atom+xml">
-</head><body class="is-flex is-flex-direction-column"><header class="header-widget is-flex-shrink-0 is-hidden-mobile"><div class="container is-fullhd is-flex is-justify-content-space-between is-align-items-center is-full-height"><section class="is-hidden-mobile is-flex-shrink-0"><h2><a href="/">Georgeqi's blog</a></h2></section><h3 class="is-hidden-mobile is-family-serif is-full-height is-flex is-align-items-center is-flex-shrink-0"><span>Archives · All</span></h3><aside class="is-flex-shrink-0"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></aside></div></header><header class="is-flex header-widget is-flex-shrink-0 is-align-items-center is-justify-content-center is-hidden-tablet"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></header><main><article class="post-container is-flex is-justify-content-center section container is-max-widescreen pt-4 px-2"><div class="columns is-variable is-1-tablet is-3-desktop-only is-2-widescreen is-full-width"><section class="column"><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/20/Diffusion%E6%95%99%E7%A8%8B2-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/各种生成模型总览.png" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/20/Diffusion%E6%95%99%E7%A8%8B2-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/20/Diffusion%E6%95%99%E7%A8%8B2-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/各种生成模型总览.png" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/20/Diffusion%E6%95%99%E7%A8%8B2-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/">Diffusion教程2-理论推导</a></h2><time class="has-text-grey" datetime="2022-12-20T13:27:59.000Z">2022-12-20</time><p class="is-flex-grow-2 mt-2">概述
+</head><body class="is-flex is-flex-direction-column"><header class="header-widget is-flex-shrink-0 is-hidden-mobile"><div class="container is-fullhd is-flex is-justify-content-space-between is-align-items-center is-full-height"><section class="is-hidden-mobile is-flex-shrink-0"><h2><a href="/">Georgeqi's blog</a></h2></section><h3 class="is-hidden-mobile is-family-serif is-full-height is-flex is-align-items-center is-flex-shrink-0"><span>Archives · All</span></h3><aside class="is-flex-shrink-0"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></aside></div></header><header class="is-flex header-widget is-flex-shrink-0 is-align-items-center is-justify-content-center is-hidden-tablet"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></header><main><article class="post-container is-flex is-justify-content-center section container is-max-widescreen pt-4 px-2"><div class="columns is-variable is-1-tablet is-3-desktop-only is-2-widescreen is-full-width"><section class="column"><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/20221225095139_mnist_latest_progress.jpg" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/20221225095139_mnist_latest_progress.jpg" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/">Diffusion学习3-代码实践</a></h2><time class="has-text-grey" datetime="2022-12-25T13:27:59.000Z">2022-12-25</time><p class="is-flex-grow-2 mt-2">各数据集参数配置及效果
+训练:
+CUDA_VISIBLE_DEVICES=0 python train_solver.py --data_name &quot;Flower102&quot;
+在config.yaml中各个数据集使用默认的Training Setting，每个数据集特有的配置见config.yaml下的Train_Data.
+生成效果
+生成效果如下:
+
+
+
+数据集
+去噪过程可视化
+最终去噪效果
+插值
+
+
+
+
+Mnist
+
+
+
+
+
+Fashion_Mnist
+
+
+
+
+
+Cifar10
+
+
+
+
+
+Flower102
+
+
+
+
+
+StyleGAN2人脸
+
+
+
+
+
+
+上述训练数据集和已经训练好的模型放在这里.
+
+去噪过程可视化中，如果在采样step内均匀采样时间戳，会发现前面的去噪过程过于缓慢而后面会突然“有效果”，所以..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/">Read more</a></section></article><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/20/Diffusion%E5%AD%A6%E4%B9%A02-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/各种生成模型总览.png" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/20/Diffusion%E5%AD%A6%E4%B9%A02-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/20/Diffusion%E5%AD%A6%E4%B9%A02-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/各种生成模型总览.png" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/20/Diffusion%E5%AD%A6%E4%B9%A02-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/">Diffusion学习2-理论推导</a></h2><time class="has-text-grey" datetime="2022-12-20T13:27:59.000Z">2022-12-20</time><p class="is-flex-grow-2 mt-2">概述
 
 生成模型总览(原图来自lilianweng.blog)
 
@@ -11,7 +61,7 @@ Diffusion属于生成模型的一种，相比较于GAN等其他生成模型，Di
 
 上面两个过程示意图可以表示如下:
 
-Diffusion的前向和逆向过程(原图来自Ho et a..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/20/Diffusion%E6%95%99%E7%A8%8B2-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/">Read more</a></section></article><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/10/Diffusion%E6%95%99%E7%A8%8B1-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/VAE示意图.png" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/10/Diffusion%E6%95%99%E7%A8%8B1-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/10/Diffusion%E6%95%99%E7%A8%8B1-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/VAE示意图.png" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/10/Diffusion%E6%95%99%E7%A8%8B1-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/">Diffusion教程1-预备知识</a></h2><time class="has-text-grey" datetime="2022-12-10T13:27:59.000Z">2022-12-10</time><p class="is-flex-grow-2 mt-2">马尔科夫链
+Diffusion的前向和逆向过程(原图来自Ho et a..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/20/Diffusion%E5%AD%A6%E4%B9%A02-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/">Read more</a></section></article><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/VAE示意图.png" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/VAE示意图.png" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/">Diffusion学习1-预备知识</a></h2><time class="has-text-grey" datetime="2022-12-10T13:27:59.000Z">2022-12-10</time><p class="is-flex-grow-2 mt-2">马尔科夫链
 
 总体思想: 过去的所有信息都被保存在了现在的状态中，只使用现在状态就能预测到之后的状态，换句话说就是某个时刻的状态转移概率只依赖于它的前一个状态。
 公式化表达:
@@ -26,7 +76,7 @@ Diffusion的前向和逆向过程(原图来自Ho et a..</p><a class="button is-d
 
 高斯分布的可加性
 两个独立高斯分布相加仍然是高斯分布，且相加后的高斯分布均值为原两个高斯分布均值之和，方差为原方差之和: 
-AE..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/10/Diffusion%E6%95%99%E7%A8%8B1-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/">Read more</a></section></article></section><aside class="column is-hidden-mobile is-4-tablet is-3-widescreen"><div style="position: sticky; top: 50px;"><main class="aside-card-container archives-widget is-in-archive-page"><h3>Archives</h3><section><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">December 2022</a><span class="archive-list-count">2</span></li></ul></section></main></div></aside></div></article><script>$claudia.fadeInImage(null, $claudia.blurBackdropImg)
+AE..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/">Read more</a></section></article></section><aside class="column is-hidden-mobile is-4-tablet is-3-widescreen"><div style="position: sticky; top: 50px;"><main class="aside-card-container archives-widget is-in-archive-page"><h3>Archives</h3><section><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">December 2022</a><span class="archive-list-count">3</span></li></ul></section></main></div></aside></div></article><script>$claudia.fadeInImage(null, $claudia.blurBackdropImg)
 
 window.addEventListener('resize', $claudia.throttle(function () {
     var images = document.querySelectorAll('.js-img-fadeIn')
