@@ -148,7 +148,22 @@ AdaGrad
 不同参数有各自的自适应学习率，即全局学习率除以累计梯度平方和
 
 
-RMS..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2020/02/23/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E6%AF%94%E8%BE%83/">Read more</a></section></article></section><aside class="column is-hidden-mobile is-4-tablet is-3-widescreen"><div style="position: sticky; top: 50px;"><main class="aside-card-container archives-widget is-in-archive-page"><h3>Archives</h3><section><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">December 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a><span class="archive-list-count">3</span></li></ul></section></main></div></aside></div></article><script>$claudia.fadeInImage(null, $claudia.blurBackdropImg)
+RMS..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2020/02/23/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E6%AF%94%E8%BE%83/">Read more</a></section></article><article class="post-item-card"><section class="content post-card-content p-4 pb-5"><header><a href="/tags/%E9%9A%8F%E6%89%8B%E7%AC%94%E8%AE%B0"><i class="tag post-item-tag">随手笔记</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2018/04/12/Hexo%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/">Hexo建站笔记</a></h2><time class="has-text-grey" datetime="2018-04-12T03:25:11.000Z">2018-04-12</time><p class="is-flex-grow-2 mt-2">安装git和安装node.js就不多赘述~
+安装Hexo
+在指定目录下执行一下命令:
+npm install -g hexo-cli
+hexo init
+hexo install
+hexo clean
+hexo generate
+hexo server
+然后打开显示的网址，即可看到本地部署好的网站
+换主题
+新下载的主题(如hexo-theme-Claudia)放在node_modules文件夹下，而不是放在站点根目录的themes文件夹下，然后在根目录的_config.yml中修改theme属性为Claudia
+可能出现的问题
+
+端口被占用: sudo lsof -i:4000 sudo kill 
+上述方法不行的话就修改端口号: hexo的启动文件地址 node_modules-server.js 修改p..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2018/04/12/Hexo%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/">Read more</a></section></article></section><aside class="column is-hidden-mobile is-4-tablet is-3-widescreen"><div style="position: sticky; top: 50px;"><main class="aside-card-container archives-widget is-in-archive-page"><h3>Archives</h3><section><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">December 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li></ul></section></main></div></aside></div></article><script>$claudia.fadeInImage(null, $claudia.blurBackdropImg)
 
 window.addEventListener('resize', $claudia.throttle(function () {
     var images = document.querySelectorAll('.js-img-fadeIn')
