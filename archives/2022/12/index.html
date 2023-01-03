@@ -75,22 +75,14 @@ Diffusion属于生成模型的一种，相比较于GAN等其他生成模型，Di
 
 上面两个过程示意图可以表示如下:
 
-Diffusion的前向和逆向过程(原图来自Ho et a..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/20/Diffusion%E5%AD%A6%E4%B9%A02-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/">Read more</a></section></article><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/VAE示意图.png" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/VAE示意图.png" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/">Diffusion学习1-预备知识</a></h2><time class="has-text-grey" datetime="2022-12-10T13:27:59.000Z">2022-12-10</time><p class="is-flex-grow-2 mt-2">马尔科夫链
+Diffusion的前向和逆向过程(原图来自Ho et a..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/20/Diffusion%E5%AD%A6%E4%B9%A02-%E7%90%86%E8%AE%BA%E6%8E%A8%E5%AF%BC/">Read more</a></section></article><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/VAE示意图.png" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/VAE示意图.png" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/">Diffusion学习1-预备知识</a></h2><time class="has-text-grey" datetime="2022-12-10T13:27:59.000Z">2022-12-10</time><p class="is-flex-grow-2 mt-2">Diffusion模型打响了AIGC的第一枪，我之前一直是做GAN这一块的图像生成，但是奈何Diffuison模型效果好的离谱，也趁着空闲时间抱着学习的态度看看到底是他是靠着什么&quot;吊打&quot;GAN的，但是在推Diffusion公式的时候，牵扯到很多比较细碎的小知识点，有一些因为不常用也都忘记了，这里正好补充在这里，方便后续快速查询。 关于Diffusion相关的论文推导后面会单独开一个新的文章进行介绍，如果有时间和精力应该还会补充代码的实践~
+马尔科夫链
 
 总体思想: 过去的所有信息都被保存在了现在的状态中，只使用现在状态就能预测到之后的状态，换句话说就是某个时刻的状态转移概率只依赖于它的前一个状态。
 公式化表达:
 举例:
 
-股市涨跌：当前股市的涨、跌、平的状态概率分别为[0.3,0.4,0.3]，且转移概率矩阵为:  比如第二行第三列的0.05表示今天跌，明天平的概率。
-根绝上面的状态转移方程和今天的故事概率，可以依次得到后面每一轮涨、跌、平的概率:
-
-并且轮数在尽可能大的时候(60轮)，那么状态概率就一直保持在，这也是马尔科夫链的状态转移稳定性。
-放回袋中的取球问题:当前取球颜色的概率只与上次取完后的结果有关。
-
-
-高斯分布的可加性
-两个独立高斯分布相加仍然是高斯分布，且相加后的高斯分布均值为原两个高斯分布均值之和，方差为原方差之和: 
-AE..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/">Read more</a></section></article></section><aside class="column is-hidden-mobile is-4-tablet is-3-widescreen"><div style="position: sticky; top: 50px;"><main class="aside-card-container archives-widget is-in-archive-page"><h3>Archives</h3><section><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">December 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li></ul></section></main></div></aside></div></article><script>$claudia.fadeInImage(null, $claudia.blurBackdropImg)
+股市涨跌：当前股市的涨、跌、平的状态概率分别为[0.3,0.4,0.3]，且转移概率矩..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/10/Diffusion%E5%AD%A6%E4%B9%A01-%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/">Read more</a></section></article></section><aside class="column is-hidden-mobile is-4-tablet is-3-widescreen"><div style="position: sticky; top: 50px;"><main class="aside-card-container archives-widget is-in-archive-page"><h3>Archives</h3><section><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">December 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li></ul></section></main></div></aside></div></article><script>$claudia.fadeInImage(null, $claudia.blurBackdropImg)
 
 window.addEventListener('resize', $claudia.throttle(function () {
     var images = document.querySelectorAll('.js-img-fadeIn')
