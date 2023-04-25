@@ -1,0 +1,140 @@
+<!DOCTYPE html><html class="appearance-auto" lang="en"><head><meta charset="UTF-8"><title>论文笔记-对白膜Mesh上色</title><meta name="description" content="The harder you work, the luckier you will be~"><meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, initial-scale=1"><!-- Google Analytics --><!-- End Google Analytics -->
+<!-- Baidu Analytics --><!-- End Baidu Analytics --><link rel="icon" href="/images/favicon.ico"><link rel="stylesheet" href="/style/common/bulma.css"><link rel="stylesheet" href="/style/base.css"><link rel="stylesheet" href="/style/common/helper.css"><script src="/js/common.js"></script><link rel="stylesheet" href="/style/post.css"><link rel="stylesheet" href="/style/themes/highlight-theme-light.css"><link rel="stylesheet" href="/style/common/jquery.fancybox.min.css"><script src="/js/highlight.pack.js"></script><meta name="description" content="如何对已有的3D白膜生成纹理(即进行上色)是计算机视觉领域一个重要的领域，主要效果就如下图所示:
+
+3D Mesh上色示意图(原图来自论文TEXTure)
+
+这项技术能够帮助我们对同一个mesh生成不同风格/色调的&quot;外衣&quot;，对于扩充mesh的丰富性和可用性具有重要意义，这里就简单介绍一下最近读的4篇mesh上色的工作。
+【1】TEXTure: Text-Guided Texturing of 3D Shapes
+【项目主页】【论文】【代码】
+先贴上论文中给出的算法流程吧:
+
+TEXTure算法流程
+
+
+算法流程: 该算法借助当前在2D图像领域大火的Diffusion技术，在视角空间对mesh前景生成纹理，然后通过可微分渲染的方式的方式将视角空间的纹理一点点&quot;贴&quot;回mesh
+算法细节：
+
+首先要知道的是:该算.."><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Georgeqi_Blog" type="application/atom+xml">
+</head><body class="is-flex is-flex-direction-column"><header class="header-widget is-flex-shrink-0 is-hidden-mobile"><div class="container is-fullhd is-flex is-justify-content-space-between is-align-items-center is-full-height"><section class="is-hidden-mobile is-flex-shrink-0"><h2><a href="/">Georgeqi's Blog</a></h2></section><h3 class="is-hidden-mobile is-family-serif is-full-height is-flex is-align-items-center is-flex-shrink-0"><div class="is-full-height" id="postTopic"><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">论文笔记-对白膜Mesh上色</p><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">Click back to the top</p></div></h3><aside class="is-flex-shrink-0"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></aside></div></header><header class="is-flex header-widget is-flex-shrink-0 is-align-items-center is-justify-content-center is-hidden-tablet"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></header><main><main class="container is-max-widescreen content section post-page pt-4 px-4"><div class="columns is-flex-desktop is-justify-content-center is-flex-direction-row-reverse"><div class="column is-3 is-hidden-mobile"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#texture-text-guided-texturing-of-3d-shapes"><span class="toc-text">【1】TEXTure: Text-Guided Texturing of 3D Shapes</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#text2tex-text-driven-texture-synthesis-via-diffusion-models"><span class="toc-text">【2】Text2Tex: Text-driven Texture Synthesis via Diffusion Models</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#texturify-generating-textures-on-3d-shape-surfaces"><span class="toc-text">【3】Texturify: Generating Textures on 3D Shape Surfaces</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#learning-texture-generators-for-3d-shape-collections-from-internet-photo-sets"><span class="toc-text">【4】Learning Texture Generators for 3D Shape Collections from Internet Photo Sets</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></div><div class="column is-9"><header class="my-4"><a href="/tags/Mesh%E7%BA%B9%E7%90%86%E7%94%9F%E6%88%90"><i class="tag post-item-tag">Mesh纹理生成</i></a></header><h1 class="mt-0 mb-1 is-family-serif" id="postTitle">论文笔记-对白膜Mesh上色</h1><time class="has-text-grey" datetime="2023-04-22T11:27:23.000Z">2023-04-22</time><article class="mt-2 post-content"><p>如何对已有的3D白膜生成纹理(即进行上色)是计算机视觉领域一个重要的领域，主要效果就如下图所示:</p>
+<figure>
+<img src="/2023/04/22/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E5%AF%B9%E7%99%BD%E8%86%9CMesh%E4%B8%8A%E8%89%B2/intro.png" alt="3D Mesh上色示意图(原图来自论文TEXTure)"><figcaption aria-hidden="true">3D Mesh上色示意图(原图来自论文<a target="_blank" rel="noopener" href="https://texturepaper.github.io/TEXTurePaper/static/paper.pdf">TEXTure</a>)</figcaption>
+</figure>
+<p>这项技术能够帮助我们对同一个mesh生成不同风格/色调的"外衣"，对于扩充mesh的丰富性和可用性具有重要意义，这里就简单介绍一下最近读的4篇mesh上色的工作。</p>
+<h3 id="texture-text-guided-texturing-of-3d-shapes">【1】TEXTure: Text-Guided Texturing of 3D Shapes</h3>
+<p>【<a target="_blank" rel="noopener" href="https://texturepaper.github.io/TEXTurePaper/">项目主页</a>】【<a target="_blank" rel="noopener" href="https://texturepaper.github.io/TEXTurePaper/static/paper.pdf">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/TEXTurePaper/TEXTurePaper">代码</a>】</p>
+<p>先贴上论文中给出的算法流程吧:</p>
+<figure>
+<img src="/2023/04/22/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E5%AF%B9%E7%99%BD%E8%86%9CMesh%E4%B8%8A%E8%89%B2/TEXTure.png" alt="TEXTure算法流程"><figcaption aria-hidden="true">TEXTure算法流程</figcaption>
+</figure>
+<ul>
+<li><p><strong>算法流程:</strong> 该算法借助当前在2D图像领域大火的Diffusion技术，在视角空间对mesh前景生成纹理，然后通过可微分渲染的方式的方式将视角空间的纹理一点点"贴"回mesh</p></li>
+<li><p><strong>算法细节：</strong></p>
+<ul>
+<li><p>首先要知道的是:该算法没有任何需要训练的网络结构，它最需要更新的参数就是我们最终需要的"Texture Img"(其实在其代码中还有一个"Meta Texture Img"是用于辅助效果优化的，最终我们不会用到)，其通过一个初始化的方式将初始化为纯色的"Texture Img"不断更新其中的纹理。</p></li>
+<li><p>使用Stable Diffusion下depth-based的Inpainting模型，从depth图和mask图生成视角空间下的纹理，然后转动mesh得到另一个视角图，再对新视角下没有上色的区域进行"补全"。</p></li>
+<li><p>使用可微分渲染并配合MSE损失将生成的已经上色的视角图像一点点"贴"回mesh上</p></li>
+<li><p>提出了Tripmap的概念，在对新视角进行纹理"补全"的时候，将补全的区域分成了三个部分: "Keep"保留在之前视角就已经上色过的区域; "Generate"对在当前视角下第一次出现的区域进行纹理生成; "Refine"使用法向进行过滤得到需要精修额区域(一般是边缘部分)</p></li>
+</ul></li>
+<li><p><strong>算法应用：</strong>基于text的纹理生成、纹理迁移、纹理编辑</p></li>
+<li><p><strong>算法优势和劣势</strong>:</p>
+<p>该算法因为我实际跑过并且针对性地做过一些优化，所以这里我可以稍微总结以下其优点和存在的问题</p>
+<ul>
+<li>优势:
+<ul>
+<li>算法简单有效，不需要太多的3D知识，借助丰富强大的2D图像生成技术进行纹理生成</li>
+<li>直接对最终的目标-Texture Img进行更新优化，没有需要训练的网络参数</li>
+</ul></li>
+<li>劣势:
+<ul>
+<li>需要使用Diffusion技术对每个视角进行渲染，碍于Diffusion的速度问题，所以也会导致该算法运行速度较慢(论文中提到了在8个视角和每次可微渲染200步的情况下需要5分钟左右)</li>
+<li>可微渲染带来的问题:这里使用可微渲染不断迭代更新"Texture Img"，首先速度是一个问题上面提过就不多说，其次其效果也是一个大问题，其无法将上色后的视角图百分百地"贴"回mesh上，即存在重建误差。其次可微渲染会带来一些数值溢出的问题导致最终生成的结果存在比较明显的"绿点"，这在其<a target="_blank" rel="noopener" href="https://github.com/TEXTurePaper/TEXTurePaper/issues/8">Issue</a>中也被提到过。</li>
+<li>其计算新视角中没被上色过的区域是有问题的，导致最终最终结果会保留Texture Img的初始色-这里是紫色，这个问题也在<a target="_blank" rel="noopener" href="https://github.com/TEXTurePaper/TEXTurePaper/issues/8">Issue</a>中也被提到过。</li>
+</ul>
+针对上面的劣势，我通过优化贴图方式不仅使得性能有15倍的提升，而且能够很好解决"绿点"和"紫色"的伪影问题！！</li>
+</ul></li>
+</ul>
+<h3 id="text2tex-text-driven-texture-synthesis-via-diffusion-models">【2】Text2Tex: Text-driven Texture Synthesis via Diffusion Models</h3>
+<p>【<a target="_blank" rel="noopener" href="https://daveredrum.github.io/Text2Tex/">项目主页</a>】【<a target="_blank" rel="noopener" href="https://daveredrum.github.io/Text2Tex/static/Text2Tex.pdf">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/daveredrum/Text2Tex">代码(未开源)</a>】</p>
+<figure>
+<img src="/2023/04/22/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E5%AF%B9%E7%99%BD%E8%86%9CMesh%E4%B8%8A%E8%89%B2/Text2Tex.png" alt="Text2Tex算法流程"><figcaption aria-hidden="true">Text2Tex算法流程</figcaption>
+</figure>
+<ul>
+<li><p><strong>算法流程:</strong> 这篇论文的主要思路和上一篇TEXTure算法的思路整体是比较接近的，总体流程也是借助2D Diffusion对视角图进行上色然后反贴回Mesh，但是其多了一个基于视角自动选择的refine过程</p></li>
+<li><p><strong>算法细节:</strong></p>
+<ul>
+<li><p>该算法主要分成两个阶段:</p>
+<ul>
+<li>生成阶段: 和上篇论文一样，基于Depth-based Inpainting的Diffusion模型并配合ControlNet对视角图进行上色，然后反贴回Texture Img。</li>
+<li>微调阶段: 使用自动视角选择来决定下一个需要被上色渲染的视角，然后对生成阶段的结果微调精修</li>
+</ul></li>
+<li><p>该算法指出使用Inpainting算法的劣势在于其是结果依赖的，即当前的inpainting是依赖于之前生成结果的，这会导致如果之前某一步存在误差(比如在边缘部分存在了拉伸)，那么会不断累积到后面的步骤，导致最终的结果很差。这也是提出"自动视角选择"的主要原因。</p></li>
+<li><p>其针对在每个视角下的区域进行了类似TEXTure算法的划分方法:</p>
+<ul>
+<li>"New"区域: 没被之前任何一个视角看过，即当前视角下第一次见到，每个像素的denoise强度为1</li>
+<li> "Update"区域: 在之前的视角下被看到过，但在当前视角下被"观察地更好"，可理解为正对相机方向，denoise强度中等</li>
+<li>"keep"区域: 在之前的视角下被看到过了，且在当前视角下也不是最佳观察视角，denoise强度为0</li>
+<li>"Ignore"区域: 背景区域，忽视不予考虑</li>
+</ul>
+<p>(Denoise强度在0~1范围，表明Diffusion生成的结果与原图的关联性，1表示没任何关联，完全从噪声生成，靠近0则表示会借鉴原地图的信息，生成的结果也会与地图有比较大的关联)</p></li>
+<li><p>视角自动选择:</p>
+<ul>
+<li>解决的问题: 生成阶段的结果其实是会存在伪影的，尤其视角边缘在inpainting的时候会出现接缝和拉伸，虽然增加视角数目在一定程度上能缓解该问题，但是其导致的性能下降和各种模型的复杂性也使得其不是一个优雅且真的有效的方法，视角自动选择的出现则就是为了解决该问题出现的。</li>
+<li>选择流程: 先预设大量视角集合(远多于生成阶段的视角数目)，计算每个视角下的"view heat"并依次选择值最大的那个视角作为下一个渲染上色的视角，其中"view heat"可以理解为当前视角下所有前景元素的denoise强度的和。其实简单理解就是:在生成阶段肯定没办法保证mesh的每个部分都被渲染到，那么就优先选择那些“未被上色区域”占比较大的视角进行refine。</li>
+<li>具体参数: 在生成阶段使用了6个视角，在微调阶段使用了36个预设视角。</li>
+</ul></li>
+</ul></li>
+</ul>
+<h3 id="texturify-generating-textures-on-3d-shape-surfaces">【3】Texturify: Generating Textures on 3D Shape Surfaces</h3>
+<p>【<a target="_blank" rel="noopener" href="https://nihalsid.github.io/texturify/">项目主页</a>】【<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2204.02411">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/nihalsid/stylegan2-ada-3d-texture">代码</a>】</p>
+<figure>
+<img src="/2023/04/22/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E5%AF%B9%E7%99%BD%E8%86%9CMesh%E4%B8%8A%E8%89%B2/Texturify.png" alt="Texturify算法流程"><figcaption aria-hidden="true">Texturify算法流程</figcaption>
+</figure>
+<p>这篇算法是属于GAN时代的3D白膜上色方案，和前两个算法完全不同。</p>
+<ul>
+<li><strong>算法流程:</strong> 直接使用latent code和3D mesh作为输入送入到一个Encoder-StyleGAN的网络结构，然后生成一个上色好的mesh，在通过可微渲染得到一些视角图像，再利用两个判别器对生成的视角图像和真实图像进行对抗，优化全局和局部细节。</li>
+<li><strong>算法细节:</strong>
+<ul>
+<li>该方法只需要2D图像作为监督，但是这些图像必须是同一类的(如都是桌子或者都是椅子等，这可能是受限于StyleGAN吧)，直接在3D mesh表面生成纹理(具体是顶点着色还是纹理上色这里没太搞懂~)。</li>
+<li>作者觉得不在UV空间生成纹理，主要因为两方面原因:1.mesh上相邻区域在UV空间不一定相邻. 2.可能会导致接缝</li>
+<li>使用4-RoSy(4-way rotationally symmetric)方法将mesh的三角面片变成4角面片，4面片有利于在保证相邻性和最大程度减少mesh信息丢失情况下，能够支持Face Conv(下面会介绍)</li>
+<li>Face Conv: 作者提出的一个直接对3D mesh进行卷积的操作，其对当前面片加上周围8个面片进行加权平均作为本次卷积结果。</li>
+<li>在四面片mesh上进行卷积和池化，能够提供不同细粒度的特征(表现在mesh上就是不同粗细的面片)</li>
+<li>两个判别器:
+<ul>
+<li>全局判别器:直接对整张图进行判别，提升问题整体的真实性</li>
+<li>局部判别器:对局部crop出来的区域进行判别，有助于提升局部纹理的一致性</li>
+</ul></li>
+</ul></li>
+<li><strong>算法优劣:</strong>
+<ul>
+<li>优势:一次性直接在mesh上生成纹理(不会想上面两个方法一样一步步将视角"贴"回UV)，能减少边缘处的拉伸和缝隙</li>
+<li>劣势:一个模型只能对一类mesh进行上色</li>
+</ul></li>
+</ul>
+<h3 id="learning-texture-generators-for-3d-shape-collections-from-internet-photo-sets">【4】Learning Texture Generators for 3D Shape Collections from Internet Photo Sets</h3>
+<p>【<a href>项目主页(无)</a>】【<a target="_blank" rel="noopener" href="https://www.cs.wm.edu/~ppeers/publications/Yu2021LTG/Yu_BMVC2021.pdf">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/1996yr/TexGAN">代码</a>】</p>
+<figure>
+<img src="/2023/04/22/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E5%AF%B9%E7%99%BD%E8%86%9CMesh%E4%B8%8A%E8%89%B2/TexGAN.png" alt="TexGAN算法流程"><figcaption aria-hidden="true">TexGAN算法流程</figcaption>
+</figure>
+<p>这也是在GAN时代的一篇白膜上色文章。</p>
+<ul>
+<li><p><strong>算法流程:</strong></p>
+<p>对3D mesh进行UV参数化得到Texture，提起其中纹理区域的轮廓/Mask并对纹理区域直接生成纹理，利用生成后的纹理贴到mesh上并渲染得到各个视角，在视角空间下进行判别和对抗</p></li>
+<li><p><strong>算法细节:</strong></p>
+<ul>
+<li><p>使用一种比较特殊的纹理展开方法，保证原mesh上相邻的区域尽量在UV中也是相邻的(如上图中将车的前后左右上下视角整体展开，这里可以称UV中每个区域是一个chart)</p></li>
+<li><p>使用SPADE-In方法和StyleGAN为主要框架，以轮廓图/Mask为条件输入，进行纹理填充/生成</p></li>
+<li><p>对每一个视角都有一个专门的判别器，并使用相同视角的真实图作为正例进行对抗学习，其中这些视角要有一定的重合区域，不然可能会导致一致性差</p></li>
+<li><p>对轮廓图做随机背景处理，避免生成器忽视轮廓直接用纯色背景填充轮廓</p></li>
+<li><p>使用同一份StyleGAN权重生成UV空间下不同的chart(这里指的是上图中的Generated texture)，其中不同chart是利用StyleGAN中constant input设定不同的值实现的</p></li>
+<li><p>代理图像生成(Proxy Image Generation): 使用部分真实图的轮廓配合latent code生成chart，这是为了保证了StyleGAN也具备生成其他角度(非预设)chart图的能力，提升多样性避免模式崩塌。(但是真实推理的时候应该只是会生成前后左右上下这6个方位的chart图)</p></li>
+</ul></li>
+<li><p><strong>算法优劣:</strong></p>
+<ul>
+<li>优势:使用特殊UV参数化最大程度保证mesh在UV空间的连续性，而且在UV空间上色，还是比较新颖的做法</li>
+<li>劣势:一个模型只能生成一类物体mesh，通用性弱；其次需要筛选每个真实图像的角度以送到不同的判别器(这还是比较耗时的)</li>
+</ul></li>
+</ul>
+<h3 id="总结">总结</h3>
+<p>本篇博客简单分析了3D mesh上色的4片文章，总的来说上面两篇基于Diffusion的方法思路比较简单(视角图上色---&gt;贴回mesh)，基于GAN的方法则相对来说比较繁杂而且会有显示的网络训练过程，而且如果是利用StyleGAN作为生成框架，还会存在单一性的问题，再此外还需要专门设计很多trick。</p>
+</article><section class="jump-container is-flex is-justify-content-space-between my-6"><!-- em is empty placeholder--><em></em><a class="button is-default" href="/2022/12/31/Diffusion%E5%AD%A6%E4%B9%A04-%E6%95%88%E6%9E%9C%E5%92%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87/" title="Diffusion学习4-效果和性能提升"><span class="has-text-weight-semibold">Next: Diffusion学习4-效果和性能提升</span><i class="iconfont icon-next ml-2 has-text-grey"></i></a></section><article class="mt-6 comment-container"><script async repo="qzq2514/qzq2514.github.io" src="https://utteranc.es/client.js" issue-term="pathname" theme="preferred-color-scheme"></script></article></div></div></main></main><footer class="is-flex is-flex-direction-column is-align-items-center is-flex-shrink-0 is-family-serif"><section class="sns-container"><a title="twitter" target="_blank" rel="noopener nofollow" href="//twitter.com/qzq2514"><i class="iconfont icon-twitter"></i></a><!-- Github--><a title="github" target="_blank" rel="noopener nofollow" href="//github.com/qzq2514"><i class="iconfont icon-github"></i></a><!-- Ins--><a title="instagram" target="_blank" rel="noopener nofollow" href="//www.instagram.com/qzq2514"><i class="iconfont icon-ins"></i></a><!-- publish--><a title="publish" target="_blank" rel="noopener nofollow" href="https://blog.csdn.net/qzq2514"><i class="iconfont icon-rss"></i></a><!-- RSS--><!-- 知乎--><a title="zhihu" target="_blank" rel="noopener nofollow" href="//zhihu.com/people/qi-zhong-qi-62"><i class="iconfont icon-zhihu"></i></a><!-- 领英--><!-- 脸书--></section><p><span>Copyright ©</span><span> Georgeqi 2023</span></p><div class="is-flex is-justify-content-center is-flex-wrap-wrap"></div><div><span></span></div></footer><script async defer src="https://buttons.github.io/buttons.js"></script><script src="/js/jquery-3.6.1.min.js"></script><script src="/js/jquery-fancybox.min.js"></script><script src="/js/img_zoom.js"></script><script src="/js/post.js"></script></body></html>
