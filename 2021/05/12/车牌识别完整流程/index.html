@@ -129,12 +129,42 @@ mjx-container[display="true"] + br {
 <img src="/2021/05/12/%E8%BD%A6%E7%89%8C%E8%AF%86%E5%88%AB%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B/车牌识别流程.png" alt="车牌识别流程"><figcaption aria-hidden="true">车牌识别流程</figcaption>
 </figure>
 <p>解释下其中需要训练的一些DNN网络:</p>
-<ul>
-<li>车牌矫正网络【任意车牌图像 <span class="math inline"><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="3.706ex" height="1.181ex" role="img" focusable="false" viewbox="0 -511 1638 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="27F6" d="M84 237T84 250T98 270H1444Q1328 357 1301 493Q1301 494 1301 496T1300 499Q1300 511 1317 511H1320Q1329 511 1332 510T1338 506T1341 497T1344 481T1352 456Q1374 389 1425 336T1544 261Q1553 258 1553 250Q1553 244 1548 241T1524 231T1486 212Q1445 186 1415 152T1370 85T1349 35T1341 4Q1339 -6 1336 -8T1320 -11Q1300 -11 1300 0Q1300 7 1305 25Q1337 151 1444 230H98Q84 237 84 250Z"/></g></g></g></svg></mjx-container></span> 4个角点的归一化坐标】</li>
-<li>MobileNet-SSD字符检测网络【拉正后的车牌图像 <span class="math inline"><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="3.706ex" height="1.181ex" role="img" focusable="false" viewbox="0 -511 1638 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="27F6" d="M84 237T84 250T98 270H1444Q1328 357 1301 493Q1301 494 1301 496T1300 499Q1300 511 1317 511H1320Q1329 511 1332 510T1338 506T1341 497T1344 481T1352 456Q1374 389 1425 336T1544 261Q1553 258 1553 250Q1553 244 1548 241T1524 231T1486 212Q1445 186 1415 152T1370 85T1349 35T1341 4Q1339 -6 1336 -8T1320 -11Q1300 -11 1300 0Q1300 7 1305 25Q1337 151 1444 230H98Q84 237 84 250Z"/></g></g></g></svg></mjx-container></span> 每个字符的坐标位置和类别】其中类别包括(10类数字+25类字母[排除O]+1类堆叠字符)</li>
-<li>堆叠字符端到端识别网络【堆叠字符图像 <span class="math inline"><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="3.706ex" height="1.181ex" role="img" focusable="false" viewbox="0 -511 1638 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="27F6" d="M84 237T84 250T98 270H1444Q1328 357 1301 493Q1301 494 1301 496T1300 499Q1300 511 1317 511H1320Q1329 511 1332 510T1338 506T1341 497T1344 481T1352 456Q1374 389 1425 336T1544 261Q1553 258 1553 250Q1553 244 1548 241T1524 231T1486 212Q1445 186 1415 152T1370 85T1349 35T1341 4Q1339 -6 1336 -8T1320 -11Q1300 -11 1300 0Q1300 7 1305 25Q1337 151 1444 230H98Q84 237 84 250Z"/></g></g></g></svg></mjx-container></span> 堆叠字符识别结果】使用CTC损失训练，能识别不定长字符</li>
-<li>堆叠字符分割重识别网络【单个切割好的字符 <span class="math inline"><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="3.706ex" height="1.181ex" role="img" focusable="false" viewbox="0 -511 1638 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="27F6" d="M84 237T84 250T98 270H1444Q1328 357 1301 493Q1301 494 1301 496T1300 499Q1300 511 1317 511H1320Q1329 511 1332 510T1338 506T1341 497T1344 481T1352 456Q1374 389 1425 336T1544 261Q1553 258 1553 250Q1553 244 1548 241T1524 231T1486 212Q1445 186 1415 152T1370 85T1349 35T1341 4Q1339 -6 1336 -8T1320 -11Q1300 -11 1300 0Q1300 7 1305 25Q1337 151 1444 230H98Q84 237 84 250Z"/></g></g></g></svg></mjx-container></span> 单个字符识别结果】</li>
-</ul>
+<table>
+<thead>
+<tr class="header">
+<th>网络名称</th>
+<th>输入</th>
+<th>输出</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>车牌矫正网络</td>
+<td>任意车牌图像</td>
+<td>4个角点的归一化坐标</td>
+<td>输入仅车牌区域，不包括整个车身</td>
+</tr>
+<tr class="even">
+<td>MobileNet-SSD字符检测网络</td>
+<td>拉正后的车牌图像</td>
+<td>每个字符的坐标位置和类别</td>
+<td>类别包括 10类数字+25类字母[排除O]+1类堆叠字符</td>
+</tr>
+<tr class="odd">
+<td>堆叠字符端到端识别网络</td>
+<td>堆叠字符图像</td>
+<td>堆叠字符识别结果</td>
+<td>使用CTC损失训练，能识别竖排不定长字符(10类数字+25类字母[排除O])</td>
+</tr>
+<tr class="even">
+<td>堆叠字符分割重识别网络</td>
+<td>切割好的单个字符</td>
+<td>单个字符识别结果</td>
+<td>类别同样包括10类数字+25类字母[排除O]</td>
+</tr>
+</tbody>
+</table>
 <h2 id="实验数据及细节">实验数据及细节</h2>
 <p>使用两个含有堆叠字符的美国地区车牌:MD州和WV州用于训练以上所有的网络，数据情况如下:</p>
 <figure>
