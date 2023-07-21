@@ -198,7 +198,7 @@ mjx-container[display="true"] + br {
 <img src="/2023/06/10/Diffusion%E5%AD%A6%E4%B9%A06-%E7%94%9F%E6%88%90%E5%8F%AF%E6%8E%A7%E6%80%A7/textual_inversion.png" alt="Textual Inversion"><figcaption aria-hidden="true">Textual Inversion</figcaption>
 </figure>
 <ul>
-<li><p><strong>算法流程:</strong>Textual Inversion用一句话介绍就是：<strong>将指定的文本绑定到特征空间内某个特殊的向量</strong>，可以理解为Embedding的一种。不同于上面介绍的<a target="_blank" rel="noopener" href="https://dreambooth.github.io/">DreamBooth</a>、<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1609.09106">HyperNet</a>、<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2106.09685">LoRA</a>，该方法最大的特点是其仅仅在prompt空间找到合适的embedding，<strong>不会改变原文生图模型的网络权重</strong>(即属于“Prompt tuning”大类)。</p></li>
+<li><p><strong>算法流程:</strong>Textual Inversion用一句话介绍就是：<strong>通过几张目标图像将指定的文本绑定到text embedding空间内某个特殊的向量，让文生图模型能够学习到新的概念</strong>，可以理解为Embedding的一种。不同于上面介绍的<a target="_blank" rel="noopener" href="https://dreambooth.github.io/">DreamBooth</a>、<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1609.09106">HyperNet</a>、<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2106.09685">LoRA</a>，该方法最大的特点是其仅仅在prompt空间找到合适的embedding，<strong>不会改变原文生图模型的网络权重</strong>(即属于“Prompt tuning”大类)。</p></li>
 <li><p><strong>算法细节:</strong></p>
 <ul>
 <li><p>预备知识-文本编码：</p>
