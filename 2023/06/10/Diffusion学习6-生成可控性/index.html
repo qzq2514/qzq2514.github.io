@@ -227,6 +227,36 @@ mjx-container[display="true"] + br {
 </ul>
 <h3 id="controlnet">ControlNet</h3>
 <p>【<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2302.05543">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/lllyasviel/ControlNet">代码</a>】</p>
+<p>写在前面：ControlNet可谓是打响了Diffusion可控性第一枪，其凭借大道至简的设计思路和爆炸的控制效果在算法一开源后就引爆了整个文生图的AIGC圈，该博客的最开始那些效果图也是controlnet的结果。</p>
+<figure>
+<img src="/Users/georgeqi/Desktop/controlnet.png" alt="controlnet"><figcaption aria-hidden="true">controlnet</figcaption>
+</figure>
+<ul>
+<li><p><strong>算法流程:</strong>该算法整体设计思路简单但有效，其保留原本Stable Diffusion权重不变的情况下，拷贝了和Diffusion的Unet中编码器相同的网络结构，然后引入控制条件(如线稿图、分割图等)通过中间特征图的sum达到控制生成结果的目的。</p></li>
+<li><p><strong>算法细节:</strong></p>
+<ul>
+<li><p>训练细节:</p>
+<ul>
+<li>数据:【prompt，控制信号，结果图】，其中控制信号是直接对结果图进行特征提取(如使用canny提取边缘、使用深度估计预测depth等)</li>
+<li>Sudden Convergence：训练过程会有一个突然收敛的过程，如前6000step模型不收敛，生成结果与控制信号无关，但是到6000 step后某个step会突然收敛，保证生成结果和控制信号是对齐的。</li>
+</ul></li>
+<li><p>Zero Convolution：零卷积是该算法重点强调的一个点，其是一个使用全零初始化权重和bias的1x1卷积。</p>
+<ul>
+<li>基本流程: 如下图右部分所示：其拷贝了网络的权重并在引入控制信号和融入控制条件到原特征前都了使用全零卷积进行计算。</li>
+<li>优点: 全零卷积能够保证其引入的控制条件在训练初始阶段输出为0，即一开始不会引入任何控制条件信息，能够最大程度保留原Diffusion模型的生成能力，然后在训练过程中逐步引入控制条件。</li>
+</ul>
+<figure>
+<img src="/Users/georgeqi/Desktop/zeroconv.png" alt="zeroconv"><figcaption aria-hidden="true">zeroconv</figcaption>
+</figure>
+<ul>
+<li><p>可能的疑问--全零卷积难道不会导致网络训练梯度消失吗❓</p>
+<p>其实论文中也提到了，虽然全零卷积会导致输出全零但是对应的梯度不是零就会保证参数的不断更新。这里网络权重的初始化其实我之前也有<a target="_blank" rel="noopener" href="https://qzq2514.github.io/2020/02/26/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%9D%83%E9%87%8D%E5%88%9D%E5%A7%8B%E5%8C%96%E9%97%AE%E9%A2%98%E7%9A%84%E6%80%9D%E8%80%83/">一篇博客</a>介绍过可以作为参考。</p></li>
+</ul></li>
+<li><p>controlnet添加的那部分权重在UNet中是需要引入''prompt"和"time"信息直到参数更新的，其中引入"time"能够保证在diffusion去噪的初始阶段控制low-level的效果(如颜色、结构)，之后不断提升控制的细粒度(如纹理细节)，其实这是和<a target="_blank" rel="noopener" href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">sd-webui</a>中的“guidance_start”与“guidance_end”是对应的。</p></li>
+<li><p>多条件的控制:为了同时一性使用多个信号控制生成结果，首先要先训练各自的controlnet部分(就是copy出来的那部分和新加的zero convolution部分)，然后再推理的时候提取每个信号在controlnet中的不同分辨率的中间特征，然后直接做加法后再融合到原Stable Diffusion的特征中，具体做法可以参考<a target="_blank" rel="noopener" href="https://github.com/huggingface/diffusers/blob/3dd339379d1d34b06d3eafbf6c450f7798c6ce67/src/diffusers/pipelines/controlnet/multicontrolnet.py#L65">huggingface/diffusers.multicontrolnet</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/lllyasviel/ControlNet#guess-anchor">Guess Mode</a>:即仅仅使用控制信号生成图像而不使用任何prompt，作者说这样能够最大程度释放controlnet的能力。</p></li>
+</ul></li>
+</ul>
 <h3 id="t2i-adapter">T2I-Adapter</h3>
 <p>【<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2302.08453">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/TencentARC/T2I-Adapter">代码</a>】</p>
 <p>其改进版本<a target="_blank" rel="noopener" href="https://github.com/TencentARC/T2I-Adapter/blob/main/docs/coadapter.md">CoAdapter</a>也看一下</p>
@@ -285,4 +315,28 @@ mjx-container[display="true"] + br {
 </ul>
 <h3 id="layout-diffusion">Layout Diffusion</h3>
 <p>【<a target="_blank" rel="noopener" href="https://openaccess.thecvf.com/content/CVPR2023/papers/Zheng_LayoutDiffusion_Controllable_Diffusion_Model_for_Layout-to-Image_Generation_CVPR_2023_paper.pdf">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/ZGCTroy/LayoutDiffusion">代码</a>】</p>
+<p>写在前面: 这篇论文细节和公式比较多，没有对其中每个细节理解很好，这里就从整体的角度简单介绍下这篇论文。</p>
+<figure>
+<img src="/Users/georgeqi/Desktop/layoutdiffusion.png" alt="layoutdiffusion"><figcaption aria-hidden="true">layoutdiffusion</figcaption>
+</figure>
+<ul>
+<li><strong>算法框架:</strong> 该算法在Diffusion模型下提出了一个使用<strong>包围框+类别+文本</strong>控制生成结果的算法，不仅能够控制生成结果的整体布局，同时能够保证每个目标的生成质量和各个目标之间的自然融合。</li>
+<li><strong>算法细节:</strong>
+<ul>
+<li>该算法主要包括四个主要模块模块:
+<ul>
+<li>Layout Embedding: 对每个目标的包围框的坐标和类别信息进行编码</li>
+<li>Layout Fusion Module: 融合所有目标的信息，保证最终生成结果的自然性</li>
+<li>Image-Layout Fusion Module: 使用Object-aware Cross Attention融合图像和Layout信息</li>
+<li>Layout conditional diffusion moudel: 使用<a target="_blank" rel="noopener" href="https://openreview.net/forum?id=qw8AKxfYbI">classifier-free guidance</a>技术，将Layout作为条件控制Diffusion过程</li>
+</ul></li>
+<li>使用比较全的评测指标验证模型效果:
+<ul>
+<li>FID和Inception Score:生成任务重常用的指标，评估生成质量</li>
+<li>Diversity Score:使用LPIPS计算两个生成图像之间的差异性</li>
+<li>Classification Score: 将每个目标crop出来进行分类计算生成目标的准确性</li>
+<li>YOLOScore: 使用YOLO对生成图像进行目标检测并使用mAP指标可以作为layout控制准确性</li>
+</ul></li>
+</ul></li>
+</ul>
 </article><section class="jump-container is-flex is-justify-content-space-between my-6"><!-- em is empty placeholder--><em></em><a class="button is-default" href="/2023/04/22/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E5%AF%B9%E7%99%BD%E8%86%9CMesh%E4%B8%8A%E8%89%B2/" title="论文笔记-对白膜Mesh上色"><span class="has-text-weight-semibold">Next: 论文笔记-对白膜Mesh上色</span><i class="iconfont icon-next ml-2 has-text-grey"></i></a></section><article class="mt-6 comment-container"><script async repo="qzq2514/qzq2514.github.io" src="https://utteranc.es/client.js" issue-term="pathname" theme="preferred-color-scheme"></script></article></div></div></main></main><footer class="is-flex is-flex-direction-column is-align-items-center is-flex-shrink-0 is-family-serif"><section class="sns-container"><a title="twitter" target="_blank" rel="noopener nofollow" href="//twitter.com/qzq2514"><i class="iconfont icon-twitter"></i></a><!-- Github--><a title="github" target="_blank" rel="noopener nofollow" href="//github.com/qzq2514"><i class="iconfont icon-github"></i></a><!-- Ins--><a title="instagram" target="_blank" rel="noopener nofollow" href="//www.instagram.com/qzq2514"><i class="iconfont icon-ins"></i></a><!-- publish--><a title="publish" target="_blank" rel="noopener nofollow" href="https://blog.csdn.net/qzq2514"><i class="iconfont icon-rss"></i></a><!-- RSS--><!-- 知乎--><a title="zhihu" target="_blank" rel="noopener nofollow" href="//zhihu.com/people/qi-zhong-qi-62"><i class="iconfont icon-zhihu"></i></a><!-- 领英--><!-- 脸书--></section><p><span>Copyright ©</span><span> Georgeqi 2023</span></p><div class="is-flex is-justify-content-center is-flex-wrap-wrap"></div><div><span></span></div></footer><script async defer src="https://buttons.github.io/buttons.js"></script><script src="/js/jquery-3.6.1.min.js"></script><script src="/js/jquery-fancybox.min.js"></script><script src="/js/img_zoom.js"></script><script src="/js/post.js"></script></body></html>
