@@ -229,7 +229,7 @@ mjx-container[display="true"] + br {
 <p>【<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2302.05543">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/lllyasviel/ControlNet">代码</a>】</p>
 <p>写在前面：ControlNet可谓是打响了Diffusion可控性第一枪，其凭借大道至简的设计思路和爆炸的控制效果在算法一开源后就引爆了整个文生图的AIGC圈，该博客的最开始那些效果图也是controlnet的结果。</p>
 <figure>
-<img src="/Users/georgeqi/Desktop/controlnet.png" alt="controlnet"><figcaption aria-hidden="true">controlnet</figcaption>
+<img src="/2023/06/10/Diffusion%E5%AD%A6%E4%B9%A06-%E7%94%9F%E6%88%90%E5%8F%AF%E6%8E%A7%E6%80%A7/controlnet.png" alt="ControlNet"><figcaption aria-hidden="true">ControlNet</figcaption>
 </figure>
 <ul>
 <li><p><strong>算法流程:</strong>该算法整体设计思路简单但有效，其保留原本Stable Diffusion权重不变的情况下，拷贝了和Diffusion的Unet中编码器相同的网络结构，然后引入控制条件(如线稿图、分割图等)通过中间特征图的sum达到控制生成结果的目的。</p></li>
@@ -246,7 +246,7 @@ mjx-container[display="true"] + br {
 <li>优点: 全零卷积能够保证其引入的控制条件在训练初始阶段输出为0，即一开始不会引入任何控制条件信息，能够最大程度保留原Diffusion模型的生成能力，然后在训练过程中逐步引入控制条件。</li>
 </ul>
 <figure>
-<img src="/Users/georgeqi/Desktop/zeroconv.png" alt="zeroconv"><figcaption aria-hidden="true">zeroconv</figcaption>
+<img src="/2023/06/10/Diffusion%E5%AD%A6%E4%B9%A06-%E7%94%9F%E6%88%90%E5%8F%AF%E6%8E%A7%E6%80%A7/zeroconv.png" alt="Zero Convolution"><figcaption aria-hidden="true">Zero Convolution</figcaption>
 </figure>
 <ul>
 <li><p>可能的疑问--全零卷积难道不会导致网络训练梯度消失吗❓</p>
@@ -255,6 +255,17 @@ mjx-container[display="true"] + br {
 <li><p>controlnet添加的那部分权重在UNet中是需要引入''prompt"和"time"信息直到参数更新的，其中引入"time"能够保证在diffusion去噪的初始阶段控制low-level的效果(如颜色、结构)，之后不断提升控制的细粒度(如纹理细节)，其实这是和<a target="_blank" rel="noopener" href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">sd-webui</a>中的“guidance_start”与“guidance_end”是对应的。</p></li>
 <li><p>多条件的控制:为了同时一性使用多个信号控制生成结果，首先要先训练各自的controlnet部分(就是copy出来的那部分和新加的zero convolution部分)，然后再推理的时候提取每个信号在controlnet中的不同分辨率的中间特征，然后直接做加法后再融合到原Stable Diffusion的特征中，具体做法可以参考<a target="_blank" rel="noopener" href="https://github.com/huggingface/diffusers/blob/3dd339379d1d34b06d3eafbf6c450f7798c6ce67/src/diffusers/pipelines/controlnet/multicontrolnet.py#L65">huggingface/diffusers.multicontrolnet</a></p></li>
 <li><p><a target="_blank" rel="noopener" href="https://github.com/lllyasviel/ControlNet#guess-anchor">Guess Mode</a>:即仅仅使用控制信号生成图像而不使用任何prompt，作者说这样能够最大程度释放controlnet的能力。</p></li>
+<li><p>控制形式:</p>
+<ul>
+<li>ControlNet1.0提供了如下集中控制信号: Canny边缘图、建筑直线图(M-LSD)、HED边缘、手绘线稿图、动漫线稿图、姿态图、分割图、深度图、法向图</li>
+<li>ControlNet1.1在以上控制信号基础上，又添加了下面几个比较重要且独特的控制信号:
+<ul>
+<li>Shuffle：对图像重新排列生成风格类似但是内容有差别的其他结果</li>
+<li>Inpaint：对指定区域进行填充</li>
+<li>Tile：对模糊的图像补充细节(非图像超分)</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/Mikubill/sd-webui-controlnet/discussions/1236">Reference-only</a>：生成类似风格和内容都类似的其他结果</li>
+</ul></li>
+</ul></li>
 </ul></li>
 </ul>
 <h3 id="t2i-adapter">T2I-Adapter</h3>
@@ -317,7 +328,7 @@ mjx-container[display="true"] + br {
 <p>【<a target="_blank" rel="noopener" href="https://openaccess.thecvf.com/content/CVPR2023/papers/Zheng_LayoutDiffusion_Controllable_Diffusion_Model_for_Layout-to-Image_Generation_CVPR_2023_paper.pdf">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/ZGCTroy/LayoutDiffusion">代码</a>】</p>
 <p>写在前面: 这篇论文细节和公式比较多，没有对其中每个细节理解很好，这里就从整体的角度简单介绍下这篇论文。</p>
 <figure>
-<img src="/Users/georgeqi/Desktop/layoutdiffusion.png" alt="layoutdiffusion"><figcaption aria-hidden="true">layoutdiffusion</figcaption>
+<img src="/2023/06/10/Diffusion%E5%AD%A6%E4%B9%A06-%E7%94%9F%E6%88%90%E5%8F%AF%E6%8E%A7%E6%80%A7/layoutdiffusion.png" alt="Layout Diffusion"><figcaption aria-hidden="true">Layout Diffusion</figcaption>
 </figure>
 <ul>
 <li><strong>算法框架:</strong> 该算法在Diffusion模型下提出了一个使用<strong>包围框+类别+文本</strong>控制生成结果的算法，不仅能够控制生成结果的整体布局，同时能够保证每个目标的生成质量和各个目标之间的自然融合。</li>
