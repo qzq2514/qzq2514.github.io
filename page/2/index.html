@@ -276,7 +276,7 @@ WGAN：
 权重剪枝:每次更新判别器的参数之后把它们的值截断到不超过一个固定常数c
 不用基于动量的优化算法（包括momentum和 Adam）..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2019/12/12/GAN%E5%AD%A6%E4%B9%A01-%E5%9F%BA%E7%A1%80%E7%BD%91%E7%BB%9C/">Read more</a></section></article><article class="post-item-card"><section class="content post-card-content p-4 pb-5"><header><a href="/tags/%E9%9A%8F%E6%89%8B%E7%AC%94%E8%AE%B0"><i class="tag post-item-tag">随手笔记</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2018/04/12/Hexo%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/">Hexo建站笔记</a></h2><time class="has-text-grey" datetime="2018-04-12T03:25:11.000Z">2018-04-12</time><p class="is-flex-grow-2 mt-2">安装git和安装node.js就不多赘述~
 安装Hexo
-在指定目录下执行一下命令:
+在指定目录下执行以下命令:
 npm install -g hexo-cli
 hexo init
 hexo install
@@ -286,8 +286,10 @@ hexo server
 然后打开显示的网址，即可看到本地部署好的网站
 换主题
 新下载的主题(如hexo-theme-Claudia)放在node_modules文件夹下，而不是放在站点根目录的themes文件夹下，然后在根目录的_config.yml中修改theme属性为Claudia，不然可能会报No Layout:index.html的错误。
-Pandoc编译错误
-报错[ERROR][hexo-renderer-pandoc] pandoc exited with code n..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2018/04/12/Hexo%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/">Read more</a></section></article><section class="paginator is-flex is-justify-content-flex-end is-flex-wrap-wrap mt-5"><a class="extend prev" rel="prev" href="/"><i class="iconfont icon-prev has-text-grey"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span></section></section><aside class="column is-hidden-mobile is-4-tablet is-3-widescreen"><style>.search-widget .search-input {
+可能出现的问题
+
+端口被占用: sudo lsof -i:4000 sudo kill 
+上述方法不行的话就修改端口号: hexo的启动..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2018/04/12/Hexo%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/">Read more</a></section></article><section class="paginator is-flex is-justify-content-flex-end is-flex-wrap-wrap mt-5"><a class="extend prev" rel="prev" href="/"><i class="iconfont icon-prev has-text-grey"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span></section></section><aside class="column is-hidden-mobile is-4-tablet is-3-widescreen"><style>.search-widget .search-input {
     border: none;
     outline: none;
     background: transparent;
