@@ -266,13 +266,13 @@ encoder</strong>，预训练好的模型往往已经在大规模数据集上进�
 connection。</p></li>
 <li><p>3个CrossAttnDownBlock2D模块最后均有一个2倍的downsample操作，而DownBlock2D模块是不包含下采样的。</p>
 <figure>
-<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/SD_UNet.png" alt="SD的UNet结构(原图来自机器学习算法工程师.Ai小将)">
-<figcaption aria-hidden="true">SD的UNet结构(原图来自<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/pF3YmEgdvhX0yfUGgSIovw">机器学习算法工程师.Ai小将</a>)</figcaption>
+<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/SD_UNet.png" alt="SD的UNet结构(原图来自CSDN.wu_jiacheng)">
+<figcaption aria-hidden="true">SD的UNet结构(原图来自<a target="_blank" rel="noopener" href="https://blog.csdn.net/xd_wjc/article/details/134441396">CSDN.wu_jiacheng</a>)</figcaption>
 </figure>
 <p>其中每个CrossAttnDownBlock2D的结构如下：</p>
 <figure>
-<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/SD_CrossAttnDownBlock2D.png" alt="SD的CrossAttnDownBlock2D结构(原图来自机器学习算法工程师.Ai小将)">
-<figcaption aria-hidden="true">SD的CrossAttnDownBlock2D结构(原图来自<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/pF3YmEgdvhX0yfUGgSIovw">机器学习算法工程师.Ai小将</a>)</figcaption>
+<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/SD_CrossAttnDownBlock2D.png" alt="SD的CrossAttnDownBlock2D结构(原图来自CSDN.wu_jiacheng)">
+<figcaption aria-hidden="true">SD的CrossAttnDownBlock2D结构(原图来自<a target="_blank" rel="noopener" href="https://blog.csdn.net/xd_wjc/article/details/134441396">CSDN.wu_jiacheng</a>)</figcaption>
 </figure></li>
 </ul>
 <p>即每个CrossAttnDownBlock2D包含两组[ResnetBlock2D，Transformer2DModel]，而Transformer2DModel就是包含[SelfAttention,
@@ -357,6 +357,7 @@ score但是FID也会升高，<strong>SD模型默认采用7</strong>。</p></li>
 <li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/WP36cnPCdifRoMB98JQTmg">https://mp.weixin.qq.com/s/WP36cnPCdifRoMB98JQTmg</a></li>
 </ul>
 <h3 id="sdxl">SDXL</h3>
+<p>✅2023.10.7补充</p>
 <p>【<a target="_blank" rel="noopener" href="https://stability.ai/news/stable-diffusion-sdxl-1-announcement">主页</a>】【<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2307.01952">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/Stability-AI/generative-models?tab=readme-ov-file#inference">代码Git</a>】【<a target="_blank" rel="noopener" href="https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0">代码HuggingFace</a>】</p>
 <figure>
 <img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/SDXL.png" alt="SDXL整体框架">
@@ -445,8 +446,8 @@ embedding的维度并与之相加。</p>
 <p>SDXL只用了3个stage【即Conv_in后的模块】，只进行了两次2倍下采样，而之前的SD使用4个stage，包含3个2倍下采样。SDXL的网络宽度（channels）相比之前的版本并没有改变，3个stage的特征channels分别是320、640和1280。</p></li>
 </ul>
 <figure>
-<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/SDXL_UNet.png" alt="SDXL的UNet结构(原图来自funNLPer)">
-<figcaption aria-hidden="true">SDXL的UNet结构(原图来自<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/9pwsvPj5jA3h0RMGeIO7-g">funNLPer</a>)</figcaption>
+<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/SDXL_UNet.png" alt="SDXL的UNet结构(原图来自CSDN.wu_jiacheng)">
+<figcaption aria-hidden="true">SDXL的UNet结构(原图来自<a target="_blank" rel="noopener" href="https://blog.csdn.net/xd_wjc/article/details/134530784">CSDN.wu_jiacheng</a>)</figcaption>
 </figure>
 <ul>
 <li><p><strong>增加了Transformer2DModel数量：</strong></p>
