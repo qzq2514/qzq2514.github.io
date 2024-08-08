@@ -1,12 +1,15 @@
 <!DOCTYPE html><html class="appearance-auto" lang="en"><head><meta charset="UTF-8"><title>Pytorch-Hook机制</title><meta name="description" content="The harder you work, the luckier you will be~"><meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, initial-scale=1"><!-- Google Analytics --><!-- End Google Analytics -->
-<!-- Baidu Analytics --><!-- End Baidu Analytics --><link rel="icon" href="/images/favicon.ico"><link rel="stylesheet" href="/style/common/bulma.css"><link rel="stylesheet" href="/style/base.css"><link rel="stylesheet" href="/style/common/helper.css"><script src="/js/common.js"></script><link rel="stylesheet" href="/style/post.css"><link rel="stylesheet" href="/style/themes/highlight-theme-light.css"><link rel="stylesheet" href="/style/common/jquery.fancybox.min.css"><script src="/js/highlight.pack.js"></script><meta name="description" content="Hook是什么？Hook(钩子)其实并不是Pytorch特有的机制，其在软件工程中也是相当常见的，一般来说Hook表示一种自动触发的机制，即在遇到某些时间/情况之后会自动执行的事项，其实在生活中也会遇到很多Hook的事件：
+<!-- Baidu Analytics --><!-- End Baidu Analytics --><link rel="icon" href="/images/favicon.ico"><link rel="stylesheet" href="/style/common/bulma.css"><link rel="stylesheet" href="/style/base.css"><link rel="stylesheet" href="/style/common/helper.css"><script src="/js/common.js"></script><link rel="stylesheet" href="/style/post.css"><link rel="stylesheet" href="/style/themes/highlight-theme-light.css"><link rel="stylesheet" href="/style/common/jquery.fancybox.min.css"><script src="/js/highlight.pack.js"></script><meta name="description" content="Hook是什么？
+Hook(钩子)其实并不是Pytorch特有的机制，其在软件工程中也是相当常见的，一般来说Hook表示一种自动触发的机制，即在遇到某些时间/情况之后会自动执行的事项，其实在生活中也会遇到很多Hook的事件：
 
 移动到光线变化的环境里，手机屏幕亮度会跟着变化
 水烧开后就会沸腾把壶盖顶开
 火灾情况下温度升高自动触发报警系统和灭火喷头
 
 总而言之，虽然上面很多情况即便没有Hook，我们也能实现(比如手动调亮度、手动打开报警和灭火器等)，但是Hook作为一种强大的自动触发机制，能够很大程度上帮助我们提高效率。
-Pytorch中的 Hook是干嘛的？当想要查看网络输出中每层特征的shape时，有没有过手动print每个tensor.shape的情况？虽然快但是不“优雅”而且很有可能导致代码显得冗余杂乱.."><meta name="generator" content="Hexo 6.3.0"><style>mjx-container[jax="SVG"] {
+Pytorch中的
+Hook是干嘛的？
+当想要查看网络输出中每层特征的shape时，有没有过手动print每个tensor.shape的情况？虽然快但是不“优雅”而且很有可能导致代码显得冗余.."><meta name="generator" content="Hexo 6.3.0"><style>mjx-container[jax="SVG"] {
   direction: ltr;
 }
 
@@ -119,14 +122,18 @@ mjx-container[display="true"] + br {
   display: none;
 }
 </style><link rel="alternate" href="/atom.xml" title="Georgeqi_Blog" type="application/atom+xml">
-</head><body class="is-flex is-flex-direction-column"><header class="header-widget is-flex-shrink-0 is-hidden-mobile"><div class="container is-fullhd is-flex is-justify-content-space-between is-align-items-center is-full-height"><section class="is-hidden-mobile is-flex-shrink-0"><h2><a href="/">Georgeqi's Blog</a></h2></section><h3 class="is-hidden-mobile is-family-serif is-full-height is-flex is-align-items-center is-flex-shrink-0"><div class="is-full-height" id="postTopic"><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">Pytorch-Hook机制</p><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">Click back to the top</p></div></h3><aside class="is-flex-shrink-0"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></aside></div></header><header class="is-flex header-widget is-flex-shrink-0 is-align-items-center is-justify-content-center is-hidden-tablet"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></header><main><main class="container is-max-widescreen content section post-page pt-4 px-4"><div class="columns is-flex-desktop is-justify-content-center is-flex-direction-row-reverse"><div class="column is-3 is-hidden-mobile"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Hook%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-text">Hook是什么？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pytorch%E4%B8%AD%E7%9A%84-Hook%E6%98%AF%E5%B9%B2%E5%98%9B%E7%9A%84%EF%BC%9F"><span class="toc-text">Pytorch中的 Hook是干嘛的？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pytorch%E4%B8%ADHook%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-text">Pytorch中Hook的应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%89%93%E5%8D%B0%E4%B8%AD%E9%97%B4%E5%BC%A0%E9%87%8F%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-text">1.打印中间张量的信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%8F%90%E5%8F%96%E7%89%B9%E5%BE%81"><span class="toc-text">2.提取特征</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%A2%AF%E5%BA%A6%E8%A3%81%E5%89%AA1"><span class="toc-text">3.梯度裁剪1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%A2%AF%E5%BA%A6%E8%A3%81%E5%89%AA2"><span class="toc-text">3.梯度裁剪2</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></div><div class="column is-9"><header class="my-4"><a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80"><i class="tag post-item-tag">编程语言</i></a></header><h1 class="mt-0 mb-1 is-family-serif" id="postTitle">Pytorch-Hook机制</h1><time class="has-text-grey" datetime="2023-08-10T08:01:50.000Z">2023-08-10</time><article class="mt-2 post-content"><h1 id="Hook是什么？"><a href="#Hook是什么？" class="headerlink" title="Hook是什么？"></a>Hook是什么？</h1><p>Hook(钩子)其实并不是Pytorch特有的机制，其在软件工程中也是相当常见的，一般来说Hook表示一种自动触发的机制，即在遇到某些时间/情况之后会自动执行的事项，其实在生活中也会遇到很多Hook的事件：</p>
+</head><body class="is-flex is-flex-direction-column"><header class="header-widget is-flex-shrink-0 is-hidden-mobile"><div class="container is-fullhd is-flex is-justify-content-space-between is-align-items-center is-full-height"><section class="is-hidden-mobile is-flex-shrink-0"><h2><a href="/">Georgeqi's Blog</a></h2></section><h3 class="is-hidden-mobile is-family-serif is-full-height is-flex is-align-items-center is-flex-shrink-0"><div class="is-full-height" id="postTopic"><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">Pytorch-Hook机制</p><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">Click back to the top</p></div></h3><aside class="is-flex-shrink-0"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></aside></div></header><header class="is-flex header-widget is-flex-shrink-0 is-align-items-center is-justify-content-center is-hidden-tablet"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></header><main><main class="container is-max-widescreen content section post-page pt-4 px-4"><div class="columns is-flex-desktop is-justify-content-center is-flex-direction-row-reverse"><div class="column is-3 is-hidden-mobile"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#hook%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">Hook是什么？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#pytorch%E4%B8%AD%E7%9A%84-hook%E6%98%AF%E5%B9%B2%E5%98%9B%E7%9A%84"><span class="toc-text">Pytorch中的
+Hook是干嘛的？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#pytorch%E4%B8%ADhook%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-text">Pytorch中Hook的应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%93%E5%8D%B0%E4%B8%AD%E9%97%B4%E5%BC%A0%E9%87%8F%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-text">1.打印中间张量的信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8F%96%E7%89%B9%E5%BE%81"><span class="toc-text">2.提取特征</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A2%AF%E5%BA%A6%E8%A3%81%E5%89%AA1"><span class="toc-text">3.梯度裁剪1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A2%AF%E5%BA%A6%E8%A3%81%E5%89%AA2"><span class="toc-text">3.梯度裁剪2</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></div><div class="column is-9"><header class="my-4"><a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80"><i class="tag post-item-tag">编程语言</i></a></header><h1 class="mt-0 mb-1 is-family-serif" id="postTitle">Pytorch-Hook机制</h1><time class="has-text-grey" datetime="2023-08-10T08:01:50.000Z">2023-08-10</time><article class="mt-2 post-content"><h1 id="hook是什么">Hook是什么？</h1>
+<p>Hook(钩子)其实并不是Pytorch特有的机制，其在软件工程中也是相当常见的，一般来说Hook表示一种自动触发的机制，即在遇到某些时间/情况之后会自动执行的事项，其实在生活中也会遇到很多Hook的事件：</p>
 <ul>
 <li>移动到光线变化的环境里，手机屏幕亮度会跟着变化</li>
 <li>水烧开后就会沸腾把壶盖顶开</li>
 <li>火灾情况下温度升高自动触发报警系统和灭火喷头</li>
 </ul>
 <p>总而言之，虽然上面很多情况即便没有Hook，我们也能实现(比如手动调亮度、手动打开报警和灭火器等)，但是Hook作为一种强大的自动触发机制，能够很大程度上帮助我们提高效率。</p>
-<h1 id="Pytorch中的-Hook是干嘛的？"><a href="#Pytorch中的-Hook是干嘛的？" class="headerlink" title="Pytorch中的 Hook是干嘛的？"></a><strong>Pytorch中的 Hook是干嘛的？</strong></h1><p>当想要查看网络输出中每层特征的shape时，有没有过手动print每个<code>tensor.shape</code>的情况？虽然快但是不“优雅”而且很有可能导致代码显得冗余杂乱。这时候如果在网络前向过程中设置hook机制，就能自动打印张量的shape，并且不会影响原代码的功能和逻辑，这些被添加的小功能就像一个小钩子🪝一样“挂”在原代码逻辑上但是不会改变原逻辑。</p>
+<h1 id="pytorch中的-hook是干嘛的"><strong>Pytorch中的
+Hook是干嘛的？</strong></h1>
+<p>当想要查看网络输出中每层特征的shape时，有没有过手动print每个<code>tensor.shape</code>的情况？虽然快但是不“优雅”而且很有可能导致代码显得冗余杂乱。这时候如果在网络前向过程中设置hook机制，就能自动打印张量的shape，并且不会影响原代码的功能和逻辑，这些被添加的小功能就像一个小钩子🪝一样“挂”在原代码逻辑上但是不会改变原逻辑。</p>
 <p>在Pytorch中Hook能做的事情非常多：</p>
 <ul>
 <li>打印输出每层张量的shape</li>
@@ -141,158 +148,158 @@ mjx-container[display="true"] + br {
 <li><a target="_blank" rel="noopener" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html?highlight=hook#torch.nn.Module.register_backward_hook">torch.nn.Module.register_backward_hook</a></li>
 </ul>
 <p>针对Tensor和Module的hook函数签名如下:</p>
-<pre><code class="python">from torch import nn, Tensor
-def module_hook(module:nn.Module, input:Tensor, output:Tensor):
-    # 接受module类型对象，及其输入输出，这里可以做尺寸的打印、梯度裁剪、特征提取等
-    
-def tensor_hook(grad:Tensor):
-      # 接受tensor的梯度信息，这里也可以做尺寸的打印、梯度裁剪
-</code></pre>
-<h1 id="Pytorch中Hook的应用"><a href="#Pytorch中Hook的应用" class="headerlink" title="Pytorch中Hook的应用"></a>Pytorch中Hook的应用</h1><h2 id="1-打印中间张量的信息"><a href="#1-打印中间张量的信息" class="headerlink" title="1.打印中间张量的信息"></a>1.打印中间张量的信息</h2><pre><code class="python">import torch
-from torch import nn, Tensor
-
-class DemoMoudule(nn.Module):
-    def __init__(self):
-        super().__init__()
-        # 构建一个简单的DNN网络: 由两个卷积输入层、一个BN层、一个卷积输出层
-        self.conv_in = nn.Sequential(nn.Conv2d(3, 2, 3, 2),
-                                      nn.Conv2d(2, 1, 3, 2))
-        self.bn = nn.BatchNorm2d(1)
-        self.conv_out = nn.Conv2d(1, 20, 3, 1)
-
-        # 为该网络的每个一级子module(即conv_in、bn和conv_out)注册前向hook,
-        # 在forward时候会自动调用对应的函数(这里是打印该module输出层的名称、尺寸、均值)
-        for name, layer in self.named_children():
-            layer.__name__ = name
-            layer.register_forward_hook(
-                lambda l, _, output:
-                print("{}:{},{}".format(l.__name__, output.shape, torch.mean(output)))
-            )
-            
-    def forward(self, x: Tensor) -&gt; Tensor:
-        x = self.conv_in(x)
-        x = self.bn(x)
-        x = self.conv_out(x)
-        return x
-
-demo_model = DemoMoudule()
-dummy_input = torch.ones(10, 3, 28, 28)
-dummy_output = demo_model(dummy_input)
-'''
-输出：
-conv_in:torch.Size([10, 1, 6, 6]),-0.3441038727760315
-bn:torch.Size([10, 1, 6, 6]),0.0
-conv_out:torch.Size([10, 20, 4, 4]),0.07038399577140808
-'''
-</code></pre>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn, Tensor</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> module_hook(module:nn.Module, <span class="bu">input</span>:Tensor, output:Tensor):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 接受module类型对象，及其输入输出，这里可以做尺寸的打印、梯度裁剪、特征提取等</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tensor_hook(grad:Tensor):</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 接受tensor的梯度信息，这里也可以做尺寸的打印、梯度裁剪</span></span></code></pre></div>
+<h1 id="pytorch中hook的应用">Pytorch中Hook的应用</h1>
+<h2 id="打印中间张量的信息">1.打印中间张量的信息</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn, Tensor</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DemoMoudule(nn.Module):</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 构建一个简单的DNN网络: 由两个卷积输入层、一个BN层、一个卷积输出层</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv_in <span class="op">=</span> nn.Sequential(nn.Conv2d(<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                                      nn.Conv2d(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>))</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bn <span class="op">=</span> nn.BatchNorm2d(<span class="dv">1</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv_out <span class="op">=</span> nn.Conv2d(<span class="dv">1</span>, <span class="dv">20</span>, <span class="dv">3</span>, <span class="dv">1</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 为该网络的每个一级子module(即conv_in、bn和conv_out)注册前向hook,</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 在forward时候会自动调用对应的函数(这里是打印该module输出层的名称、尺寸、均值)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, layer <span class="kw">in</span> <span class="va">self</span>.named_children():</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            layer.<span class="va">__name__</span> <span class="op">=</span> name</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>            layer.register_forward_hook(</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>                <span class="kw">lambda</span> l, _, output:</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="st">"</span><span class="sc">{}</span><span class="st">:</span><span class="sc">{}</span><span class="st">,</span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(l.<span class="va">__name__</span>, output.shape, torch.mean(output)))</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.conv_in(x)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.bn(x)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.conv_out(x)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>demo_model <span class="op">=</span> DemoMoudule()</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>dummy_input <span class="op">=</span> torch.ones(<span class="dv">10</span>, <span class="dv">3</span>, <span class="dv">28</span>, <span class="dv">28</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>dummy_output <span class="op">=</span> demo_model(dummy_input)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co">输出：</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">conv_in:torch.Size([10, 1, 6, 6]),-0.3441038727760315</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">bn:torch.Size([10, 1, 6, 6]),0.0</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">conv_out:torch.Size([10, 20, 4, 4]),0.07038399577140808</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span></code></pre></div>
 <p>利用此技术，我们还可以针对已有的网络（比如ResNet50）,在不修改该网络定义和源码的同时使用类似上面的一个封装，在前向过程中打印对应的张量尺寸(可参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/279903361">zhihu.McGL</a>)。</p>
-<h2 id="2-提取特征"><a href="#2-提取特征" class="headerlink" title="2.提取特征"></a>2.提取特征</h2><pre><code class="python">import torch
-from torch import nn, Tensor
-from typing import Iterable, Dict
-
-class FeatureExtreactor(nn.Module):
-    def __init__(self, model: nn.Module, layer_names:Iterable[str]):
-        super().__init__()
-        self.model = model
-        self.layer_names = layer_names
-        self.__extraced_features = {}
-
-        org_modules = dict([*self.model.named_modules()])
-        for layer_name in layer_names:
-            layer = org_modules[layer_name]
-            layer.__name__ = layer_name
-            # 将指定名称的Module输出添加到待返回的集合中
-            layer.register_forward_hook(self.append_features)
-
-    def append_features(self, layer, _, output_tensor):
-        self.__extraced_features[layer.__name__] = output_tensor
-
-    def forward(self, x: Tensor) -&gt; Dict[str, Tensor]:
-        _ = self.model(x)
-        return self.__extraced_features
-
-# 获取指定层的属性
-feature_extreactor = FeatureExtreactor(demo_model, layer_names=["conv_in", "conv_out"])
-dummy_input = torch.ones(10, 3, 28, 28)
-demo_features = feature_extreactor(dummy_input)
-for name, feature in demo_features.items():
-    print("{}: {} {}".format(name, feature.shape, torch.mean(feature)))
-    
-'''
-在使用之前DemoMoudule()类的情况下，输出：
-conv_in: torch.Size([10, 1, 6, 6]) 0.05633455887436867
-conv_out: torch.Size([10, 20, 4, 4]) 0.04933914169669151
-'''
-</code></pre>
+<h2 id="提取特征">2.提取特征</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn, Tensor</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Iterable, Dict</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FeatureExtreactor(nn.Module):</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model: nn.Module, layer_names:Iterable[<span class="bu">str</span>]):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer_names <span class="op">=</span> layer_names</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.__extraced_features <span class="op">=</span> {}</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        org_modules <span class="op">=</span> <span class="bu">dict</span>([<span class="op">*</span><span class="va">self</span>.model.named_modules()])</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> layer_name <span class="kw">in</span> layer_names:</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            layer <span class="op">=</span> org_modules[layer_name]</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            layer.<span class="va">__name__</span> <span class="op">=</span> layer_name</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 将指定名称的Module输出添加到待返回的集合中</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            layer.register_forward_hook(<span class="va">self</span>.append_features)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> append_features(<span class="va">self</span>, layer, _, output_tensor):</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.__extraced_features[layer.<span class="va">__name__</span>] <span class="op">=</span> output_tensor</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: Tensor) <span class="op">-&gt;</span> Dict[<span class="bu">str</span>, Tensor]:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        _ <span class="op">=</span> <span class="va">self</span>.model(x)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.__extraced_features</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co"># 获取指定层的属性</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>feature_extreactor <span class="op">=</span> FeatureExtreactor(demo_model, layer_names<span class="op">=</span>[<span class="st">"conv_in"</span>, <span class="st">"conv_out"</span>])</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>dummy_input <span class="op">=</span> torch.ones(<span class="dv">10</span>, <span class="dv">3</span>, <span class="dv">28</span>, <span class="dv">28</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>demo_features <span class="op">=</span> feature_extreactor(dummy_input)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, feature <span class="kw">in</span> demo_features.items():</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="sc">{}</span><span class="st">: </span><span class="sc">{}</span><span class="st"> </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(name, feature.shape, torch.mean(feature)))</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">在使用之前DemoMoudule()类的情况下，输出：</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">conv_in: torch.Size([10, 1, 6, 6]) 0.05633455887436867</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">conv_out: torch.Size([10, 20, 4, 4]) 0.04933914169669151</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span></code></pre></div>
 <p>上面利用Module的前向hook可以根据指定的模块名获取网络指定的特征层，有了获取的特征层，我们能做的事情就非常多了，不仅仅获取shape、均值，此外也能进行特征图可视化等等。</p>
 <p>而在深度学习中常常会要求计算图像的VGG特征也可以使用该方法推理获得。</p>
-<h2 id="3-梯度裁剪1"><a href="#3-梯度裁剪1" class="headerlink" title="3.梯度裁剪1"></a>3.梯度裁剪1</h2><p>在未进行梯度裁剪的时候，我们打印demo_model网络最后一个卷积的前10个biase的梯度如下:</p>
-<pre><code class="python">demo_model = DemoMoudule()
-dummy_input = torch.ones(10, 3, 28, 28)
-pred = demo_model(dummy_input)
-loss = pred.log().mean()
-loss.backward()
-print(demo_model.conv_out.bias.grad)
-'''
-输出：
-tensor([  0.7894,   1.0285,  -0.6203,  -0.1882,   0.6290,  -0.2002,   0.5751,
-          0.1875,  -0.5093,   0.3338,  -1.4956,   0.2797,  -0.4018,  -0.1860,
-        -12.1006,   0.2474,   1.7059,   0.1834,   0.3505,   0.3189])
-'''
-</code></pre>
+<h2 id="梯度裁剪1">3.梯度裁剪1</h2>
+<p>在未进行梯度裁剪的时候，我们打印demo_model网络最后一个卷积的前10个biase的梯度如下:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>demo_model <span class="op">=</span> DemoMoudule()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>dummy_input <span class="op">=</span> torch.ones(<span class="dv">10</span>, <span class="dv">3</span>, <span class="dv">28</span>, <span class="dv">28</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>pred <span class="op">=</span> demo_model(dummy_input)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> pred.log().mean()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>loss.backward()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(demo_model.conv_out.bias.grad)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">输出：</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">tensor([  0.7894,   1.0285,  -0.6203,  -0.1882,   0.6290,  -0.2002,   0.5751,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">          0.1875,  -0.5093,   0.3338,  -1.4956,   0.2797,  -0.4018,  -0.1860,</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">        -12.1006,   0.2474,   1.7059,   0.1834,   0.3505,   0.3189])</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span></code></pre></div>
 <p>在使用Tensor形式的hook机制时，我们设定参数的梯度tensor的梯度在某个范围内，如下：</p>
-<pre><code class="python">def gradient_clipper(model: nn.Module, clip_val:float)-&gt; nn.Module:
-    for parameter in model.parameters():
-        # 对梯度tensor添加用于梯度截断的hook
-        parameter.register_hook(lambda grad: grad.clamp_(-clip_val, clip_val))
-    return model
-
-clipped_model = gradient_clipper(demo_model, 0.01)
-pred = clipped_model(dummy_input)
-loss = pred.log().mean()
-loss.backward()
-print(clipped_model.conv_out.bias.grad)
-
-'''
-输出：
-tensor([-0.0100, -0.0100,  0.0100, -0.0100, -0.0100, -0.0100,  0.0100, -0.0100,
-        -0.0100, -0.0100,  0.0100, -0.0100, -0.0100,  0.0100,  0.0100,  0.0100,
-        -0.0100,  0.0100, -0.0100, -0.0100])
-可以看到梯度被限制到-0.01~0.01之间。
-'''
-</code></pre>
-<h2 id="3-梯度裁剪2"><a href="#3-梯度裁剪2" class="headerlink" title="3.梯度裁剪2"></a>3.梯度裁剪2</h2><p>使用Moduel的register_backward_hook函数也能进行梯度裁剪：</p>
-<pre><code class="python">def gradient_clipper2(model: nn.Module, clip_val:float)-&gt; nn.Module:
-    # grad_input元组包含(bias的梯度，输入x的梯度，权重weight的梯度)，grad_output元组包含输出y的梯度。
-    # 返回的是修改后的grad_input
-    def back_hook(module, grad_input, grad_output):
-        print('grad_input: ', grad_input)
-        print('grad_output: ', grad_output)
-        return grad_input[0].clamp(-clip_val, clip_val), \
-               grad_input[1].clamp(-clip_val*2, clip_val*2), \
-               grad_input[2].clamp(-clip_val*3, clip_val*3),
-    for moduel in model.modules():
-        moduel.register_backward_hook(back_hook)
-    return model
-
-# 因为grad_input是对输入x的梯度，所以要求x也是有梯度的，即要设定requires_grad=True
-x = torch.tensor([[1., 2., 10.]], requires_grad=True)
-module = gradient_clipper2(nn.Linear(3, 2), 0.001)
-y = module(x)
-y.mean().backward()
-print('module_bias: {}, x:{} module_weight:{}'.
-      format(module.bias.grad, x.grad, module.weight.grad))
-
-'''
-输出:
-grad_input:  (tensor([0.5000, 0.5000]), tensor([[0.2492, 0.2174, 0.0614]]),  tensor([[0.5000, 0.5000],
-        [1.0000, 1.0000],
-        [5.0000, 5.0000]]))
-grad_output:  (tensor([[0.5000, 0.5000]]),)
-module_bias: tensor([0.0010, 0.0010]), x:tensor([[0.0020, 0.0020, 0.0020]]) module_weight:tensor([[0.0030, 0.0030, 0.0030], [0.0030, 0.0030, 0.0030]])
-'''
-</code></pre>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>hook机制能够方便快捷地帮助我们做一些调试等辅助工作，同时也能保证代码的简洁性，其实除了上面的三种hook，pytorch还有register_full_backward_hook、register_forward_pre_hook等，但是比较常用的三种和对应的用法列在上面了，其他的用到时候再自己看后补充进来！</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gradient_clipper(model: nn.Module, clip_val:<span class="bu">float</span>)<span class="op">-&gt;</span> nn.Module:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> parameter <span class="kw">in</span> model.parameters():</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 对梯度tensor添加用于梯度截断的hook</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        parameter.register_hook(<span class="kw">lambda</span> grad: grad.clamp_(<span class="op">-</span>clip_val, clip_val))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>clipped_model <span class="op">=</span> gradient_clipper(demo_model, <span class="fl">0.01</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>pred <span class="op">=</span> clipped_model(dummy_input)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> pred.log().mean()</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>loss.backward()</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(clipped_model.conv_out.bias.grad)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">输出：</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">tensor([-0.0100, -0.0100,  0.0100, -0.0100, -0.0100, -0.0100,  0.0100, -0.0100,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">        -0.0100, -0.0100,  0.0100, -0.0100, -0.0100,  0.0100,  0.0100,  0.0100,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">        -0.0100,  0.0100, -0.0100, -0.0100])</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">可以看到梯度被限制到-0.01~0.01之间。</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span></code></pre></div>
+<h2 id="梯度裁剪2">3.梯度裁剪2</h2>
+<p>使用Moduel的register_backward_hook函数也能进行梯度裁剪：</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gradient_clipper2(model: nn.Module, clip_val:<span class="bu">float</span>)<span class="op">-&gt;</span> nn.Module:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># grad_input元组包含(bias的梯度，输入x的梯度，权重weight的梯度)，grad_output元组包含输出y的梯度。</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 返回的是修改后的grad_input</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> back_hook(module, grad_input, grad_output):</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">'grad_input: '</span>, grad_input)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">'grad_output: '</span>, grad_output)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> grad_input[<span class="dv">0</span>].clamp(<span class="op">-</span>clip_val, clip_val), <span class="op">\</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>               grad_input[<span class="dv">1</span>].clamp(<span class="op">-</span>clip_val<span class="op">*</span><span class="dv">2</span>, clip_val<span class="op">*</span><span class="dv">2</span>), <span class="op">\</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>               grad_input[<span class="dv">2</span>].clamp(<span class="op">-</span>clip_val<span class="op">*</span><span class="dv">3</span>, clip_val<span class="op">*</span><span class="dv">3</span>),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> moduel <span class="kw">in</span> model.modules():</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        moduel.register_backward_hook(back_hook)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 因为grad_input是对输入x的梯度，所以要求x也是有梯度的，即要设定requires_grad=True</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.tensor([[<span class="fl">1.</span>, <span class="fl">2.</span>, <span class="fl">10.</span>]], requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>module <span class="op">=</span> gradient_clipper2(nn.Linear(<span class="dv">3</span>, <span class="dv">2</span>), <span class="fl">0.001</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> module(x)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>y.mean().backward()</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'module_bias: </span><span class="sc">{}</span><span class="st">, x:</span><span class="sc">{}</span><span class="st"> module_weight:</span><span class="sc">{}</span><span class="st">'</span>.</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>      <span class="bu">format</span>(module.bias.grad, x.grad, module.weight.grad))</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">输出:</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">grad_input:  (tensor([0.5000, 0.5000]), tensor([[0.2492, 0.2174, 0.0614]]),  tensor([[0.5000, 0.5000],</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">        [1.0000, 1.0000],</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">        [5.0000, 5.0000]]))</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">grad_output:  (tensor([[0.5000, 0.5000]]),)</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">module_bias: tensor([0.0010, 0.0010]), x:tensor([[0.0020, 0.0020, 0.0020]]) module_weight:tensor([[0.0030, 0.0030, 0.0030], [0.0030, 0.0030, 0.0030]])</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span></code></pre></div>
+<h1 id="总结">总结</h1>
+<p>hook机制能够方便快捷地帮助我们做一些调试等辅助工作，同时也能保证代码的简洁性，其实除了上面的三种hook，pytorch还有register_full_backward_hook、register_forward_pre_hook等，但是比较常用的三种和对应的用法列在上面了，其他的用到时候再自己看后补充进来！</p>
 <p>参考:</p>
 <ul>
 <li><a target="_blank" rel="noopener" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html?highlight=hook">https://pytorch.org/docs/stable/generated/torch.nn.Module.html?highlight=hook</a></li>
