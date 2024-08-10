@@ -452,7 +452,7 @@ dicts or lists; found &lt;class
 <span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>                            cv2.COLOR_RGB2BGR))</span>
 <span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>    cv2.waitKey()</span></code></pre></div>
 <h2 id="自定义脚本加载">自定义脚本加载</h2>
-<p>其实上面<code>Dataset.from_dict</code>已经能够满足我们大多数的情况了，但是HuggingFace中很多有通过脚本下载数据的情况，包括上面通过脚本自动下载社区数据的情况。</p>
+<p>其实上面<code>Dataset.from_dict</code>已经能够满足我们大多数的需求了，但是HuggingFace中很多有通过脚本下载数据的例子，包括上面通过脚本自动下载社区数据。</p>
 <p>这里我们定义一个脚本来处理下面这种结构的数据:</p>
 <figure>
 <img src="/2024/06/12/Pytorch-%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD/脚本下载的数据结构示例.png" alt="脚本下载的数据结构示例">
@@ -473,10 +473,11 @@ dicts or lists; found &lt;class
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span></code></pre></div>
 <p>其中fill50k_custom.py中主要是定义了继承<code>datasets.GeneratorBasedBuilder</code>的类，该类要重写三个方法：</p>
 <ul>
-<li>**_info(self):** 用于描述该数据集，比如homepage、license等,</li>
-<li>**_split_generators(self, dl_manager):**
+<li><strong>函数_info(self)</strong> :
+用于描述该数据集，比如homepage、license等,</li>
+<li><strong>函数_split_generators(self, dl_manager)</strong> :
 用于划分数据集(训练/测试等)</li>
-<li>**_generate_examples(self, dl_manager):**
+<li><strong>函数_generate_examples(self, dl_manager)</strong>:
 对每个数据集进行处理(比如读取图片等)</li>
 </ul>
 <p>完整的<code>fill50k_custom.py</code>代码如下</p>
