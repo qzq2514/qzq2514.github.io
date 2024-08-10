@@ -1,0 +1,595 @@
+<!DOCTYPE html><html class="appearance-auto" lang="en"><head><meta charset="UTF-8"><title>Pytorch-数据加载</title><meta name="description" content="The harder you work, the luckier you will be~"><meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, initial-scale=1"><!-- Google Analytics --><!-- End Google Analytics -->
+<!-- Baidu Analytics --><!-- End Baidu Analytics --><link rel="icon" href="/images/favicon.ico"><link rel="stylesheet" href="/style/common/bulma.css"><link rel="stylesheet" href="/style/base.css"><link rel="stylesheet" href="/style/common/helper.css"><script src="/js/common.js"></script><link rel="stylesheet" href="/style/post.css"><link rel="stylesheet" href="/style/themes/highlight-theme-light.css"><link rel="stylesheet" href="/style/common/jquery.fancybox.min.css"><script src="/js/highlight.pack.js"></script><meta name="description" content="
+pytorch数据加载常用torch.utils.data.Dataset和torch.utils.data.DataLoader两个类进行实现，简单来说：
+
+torch.utils.data.Dataset：完成数据的初步读取和加载，其内的每一条数据是&quot;零散&quot;的
+torch.utils.data.DataLoader：对torch.utils.data.Dataset中&quot;零散&quot;的数据进行打包，同时也可以进行一些后处理操作和采样操作。
+
+下面就通过代码的方式详细介绍上面的两个类。
+torch.utils.data.Dataset
+Dataset类简单来说就是完成数据的读取操作【当然也可以做一些简单操作】，pytorch中也内置了很多常用的计算机视觉的数据集【如如MNIST、CIFAR10、ImageNet.."><meta name="generator" content="Hexo 6.3.0"><style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style><link rel="alternate" href="/atom.xml" title="Georgeqi_Blog" type="application/atom+xml">
+</head><body class="is-flex is-flex-direction-column"><header class="header-widget is-flex-shrink-0 is-hidden-mobile"><div class="container is-fullhd is-flex is-justify-content-space-between is-align-items-center is-full-height"><section class="is-hidden-mobile is-flex-shrink-0"><h2><a href="/">Georgeqi's Blog</a></h2></section><h3 class="is-hidden-mobile is-family-serif is-full-height is-flex is-align-items-center is-flex-shrink-0"><div class="is-full-height" id="postTopic"><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">Pytorch-数据加载</p><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">Click back to the top</p></div></h3><aside class="is-flex-shrink-0"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></aside></div></header><header class="is-flex header-widget is-flex-shrink-0 is-align-items-center is-justify-content-center is-hidden-tablet"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></header><main><main class="container is-max-widescreen content section post-page pt-4 px-4"><div class="columns is-flex-desktop is-justify-content-center is-flex-direction-row-reverse"><div class="column is-3 is-hidden-mobile"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#torch.utils.data.dataset"><span class="toc-text">torch.utils.data.Dataset</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#torch.utils.data.dataloader"><span class="toc-text">torch.utils.data.DataLoader</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dataset%E5%BA%93"><span class="toc-text">dataset库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E4%B8%8B%E8%BD%BD%E7%A4%BE%E5%8C%BA%E5%B7%B2%E6%9C%89%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-text">自动下载社区已有数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#git%E4%B8%8B%E8%BD%BD%E5%A5%BD%E5%90%8E%E6%9C%AC%E5%9C%B0%E5%8A%A0%E8%BD%BD"><span class="toc-text">Git下载好后本地加载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#imagefolder%E5%8A%A0%E8%BD%BD"><span class="toc-text">ImageFolder加载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dataset.from_dict%E5%8A%A0%E8%BD%BD"><span class="toc-text">Dataset.from_dict加载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%84%9A%E6%9C%AC%E5%8A%A0%E8%BD%BD"><span class="toc-text">自定义脚本加载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#webdataset%E5%8A%A0%E8%BD%BD%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-text">webdataset加载本地数据集</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></div><div class="column is-9"><header class="my-4"><a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80"><i class="tag post-item-tag">编程语言</i></a></header><h1 class="mt-0 mb-1 is-family-serif" id="postTitle">Pytorch-数据加载</h1><time class="has-text-grey" datetime="2024-06-12T08:01:50.000Z">2024-06-12</time><article class="mt-2 post-content"><p><img src="/2024/06/12/Pytorch-%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD/cover_river.png"></p>
+<p>pytorch数据加载常用torch.utils.data.Dataset和torch.utils.data.DataLoader两个类进行实现，简单来说：</p>
+<ul>
+<li>torch.utils.data.Dataset：完成数据的初步读取和加载，其内的每一条数据是"零散"的</li>
+<li>torch.utils.data.DataLoader：对torch.utils.data.Dataset中"零散"的数据进行打包，同时也可以进行一些后处理操作和采样操作。</li>
+</ul>
+<p>下面就通过代码的方式详细介绍上面的两个类。</p>
+<h1 id="torch.utils.data.dataset">torch.utils.data.Dataset</h1>
+<p>Dataset类简单来说就是完成数据的读取操作【当然也可以做一些简单操作】，pytorch中也内置了很多常用的计算机视觉的数据集【如如MNIST、CIFAR10、ImageNet】，通常是通过<a target="_blank" rel="noopener" href="https://pytorch-cn.readthedocs.io/zh/latest/torchvision/torchvision-datasets/">torchvision.datasets</a>块来实现。</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets, transforms</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 加载MNIST数据集</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> datasets.MNIST(root<span class="op">=</span><span class="st">'./data'</span>, train<span class="op">=</span><span class="va">True</span>, download<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 加载CIFAR10数据集</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> datasets.CIFAR10(root<span class="op">=</span><span class="st">'./data'</span>, train<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div>
+<p>除了上面torchvision中已经有的数据库，用Dataset类来完成自己的数据集的读取也是很重要的，比如现在手里手里有一批用于训练ControlNet模型的数据，每一组内包含【RGB图像，Conditioning图像，promot】，数据的目录结构如下：</p>
+<p><img src="/2024/06/12/Pytorch-%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD/数据集结构示例.png" alt="数据集结构示例" style="zoom:50%;"></p>
+<p>读取的示例如下：</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">data.Dataset是pytorch数据加载的基准，一般我们要重写其三个方法:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">__init__方法：进行类的初始化，一般是用来读取原始数据。</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">__getitem__方法：根据下标对每一组数据进行处理。return：对dataset[index]处理后的一组数据</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">__len__方法：return：数据集的数量(int)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Custom_Dataset(data.Dataset):</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, data_root):</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.image_dir <span class="op">=</span> os.path.join(data_root, <span class="st">"images"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conditioning_image_dir <span class="op">=</span> os.path.join(data_root, <span class="st">"conditioning_images"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.prompt_dir <span class="op">=</span> os.path.join(data_root, <span class="st">"prompts"</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.paired_data_paths <span class="op">=</span> <span class="va">self</span>.get_paired_data_paths()</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 进行一些简单的数据预处理，比如这里的缩放和灰度化</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.image_transforms <span class="op">=</span> transforms.Compose([</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            transforms.Resize(<span class="dv">512</span>, interpolation<span class="op">=</span>transforms.InterpolationMode.BILINEAR),</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>            transforms.Grayscale()</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        ] )</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_paired_data_paths(<span class="va">self</span>):</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        pair_data_paths <span class="op">=</span> []</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        image_paths <span class="op">=</span> glob(<span class="st">"</span><span class="sc">{}</span><span class="st">/*.png"</span>.<span class="bu">format</span>(<span class="va">self</span>.image_dir))</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        image_paths.sort()</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> img_path <span class="kw">in</span> image_paths:</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>            img_name <span class="op">=</span> os.path.basename(img_path)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>            cond_img_path <span class="op">=</span> os.path.join(<span class="va">self</span>.conditioning_image_dir, img_name)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>            prompt_path <span class="op">=</span> os.path.join(<span class="va">self</span>.prompt_dir, img_name.replace(<span class="st">".png"</span>, <span class="st">".txt"</span>))</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>            pair_data_paths.append((img_path, cond_img_path, prompt_path))</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pair_data_paths</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># item_idx表示整个数据集中当前读到的数据下标</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, item_idx):</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        img_path, cond_img_path, prompt_path <span class="op">=</span> <span class="va">self</span>.paired_data_paths[item_idx]</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        image <span class="op">=</span> <span class="va">self</span>.image_transforms(Image.<span class="bu">open</span>(img_path).convert(<span class="st">"RGB"</span>))</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        cond_image <span class="op">=</span> <span class="va">self</span>.image_transforms(Image.<span class="bu">open</span>(cond_img_path).convert(<span class="st">"RGB"</span>))</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(prompt_path, <span class="st">"r"</span>) <span class="im">as</span> fr:</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>            prompt <span class="op">=</span> json.loads(fr.read())[<span class="st">"text"</span>]</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1.这里的返回形式没有要求，可以是tensor、np.darray、numbers、dicts、lists、PIL.Image等各种形式</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2.【后面会说可先跳过】若包在DataLoader中且collate_fn为None，则这里不能有PIL.Image类型，比如可以换成np.darray</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return np.array(image), np.array(cond_image), prompt</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> image, cond_image, prompt</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.paired_data_paths)</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    data_root <span class="op">=</span> <span class="st">"./fill50k_imagefolder"</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    custom_dataset <span class="op">=</span> Custom_Dataset(data_root)</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 可以直接对Dataset进行一个个样本的遍历</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> image, cond_image, prompt <span class="kw">in</span> custom_dataset:</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    image.save(<span class="st">"img.png"</span>)</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    cond_image.save(<span class="st">"cond_img.png"</span>)</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(prompt)</span></code></pre></div>
+<pre><code># default_collate: batch must contain tensors, numpy arrays, numbers, dicts or lists; found &lt;class 'PIL.Image.Image'&gt;</code></pre>
+<h1 id="torch.utils.data.dataloader">torch.utils.data.DataLoader</h1>
+<p>DataLoader是对Dataset类的进一层封装，其将零散的数据进行打包，同时有一些常用的参数更近一步规范数据形式：</p>
+<ul>
+<li>batch_size：每批数据共有多少组零散的数据</li>
+<li>shuffle：是否将dataset中的元素打乱</li>
+<li>drop_last：当batch_size无法整除dataset的数量，那么是否要舍掉最后一个不完整的batch</li>
+<li>collate_fn：取出batch_size组元素然后组成一个batch送到collate_fn函数中进行后处理，最终DataLoader每次迭代返回的batch就是collate_fn的返回值</li>
+<li>sampler：表示从dataset中采样的规则，比如逆序、只要前80%等...</li>
+<li>...</li>
+</ul>
+<p>比如我们要对上面零散的ControlNet训练数据进行“打包”，示例如下：</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 这里定义了一个collate_fn的传入参数(是一个函数)，第一个参数表示从dataset中取出的一个batch的数据</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> centercrop_collate_fn(batch_item, crop_size<span class="op">=</span><span class="dv">256</span>):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 这里模拟了一个对batch中每组数据进行CenterCrop的后处理操作</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    gray_trans <span class="op">=</span> transforms.CenterCrop(crop_size)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    image_batch <span class="op">=</span> []</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    cond_image_batch <span class="op">=</span> []</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    prompt_batch <span class="op">=</span> []</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> image, cond_image, prompt <span class="kw">in</span> batch_item:</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        image_batch.append(gray_trans(image))</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        cond_image_batch.append(gray_trans(cond_image))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        prompt_batch.append(prompt)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 返回数据的类型只能是tensors, numpy arrays, numbers, dicts 或 lists</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> image_batch, cond_image_batch, prompt_batch</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return {"gray_image": image_batch, "cond_image": cond_image_batch, "prompt": cond_image_batch}</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># collate_fn的传入参数也可以是一个类</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CenterCrop_Collater():</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, crop_size<span class="op">=</span><span class="dv">256</span>):</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.crop_size <span class="op">=</span> crop_size</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 在__call__函数中实现对batch的后处理，这里也是实现同样的CenterCrop操作</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, batch_item):</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        gray_trans <span class="op">=</span> transforms.CenterCrop(<span class="va">self</span>.crop_size)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        image_batch <span class="op">=</span> []</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        cond_image_batch <span class="op">=</span> []</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        prompt_batch <span class="op">=</span> []</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> image, cond_image, prompt <span class="kw">in</span> batch_item:</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>            image_batch.append(gray_trans(image))</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>            cond_image_batch.append(gray_trans(cond_image))</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>            prompt_batch.append(prompt)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> image_batch, cond_image_batch, prompt_batch</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return {"gray_image": image_batch, "cond_image": cond_image_batch, "prompt": cond_image_batch}</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co"># 这里定义了一个sampler的传入参数(是一个类):</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> my_sampler(data.Sampler):</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># data_source是一个可迭代的数组类型, 可以是data.Dataset类型也可以是一般的list类型</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, data_source):</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.data_source <span class="op">=</span> data_source</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># __iter__是Sampler的主要函数，其返回一个可迭代对象【是一个数值类型的下标集合】，即表示每次采样的下标</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__iter__</span>(<span class="va">self</span>):</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 比如这里自己规定了四个简单的采样:</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">iter</span>(<span class="bu">range</span>(<span class="bu">len</span>(<span class="va">self</span>.data_source))[::<span class="op">-</span><span class="dv">1</span>])  <span class="co"># 逆序采样</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return iter(range(len(self.data_source)))  # 顺序采样，也是默认的采样方式</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return iter(range(len(self.data_source))[:10]) # 只采样前10个(这种切片形式其实就可以从一整个数据集中划分训练/测试集合等)</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return iter(torch.randperm(len(self.data_source)).tolist())   # 随机不重复采样</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 此外还可以根据每个类别的比例进行加权采样....</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.data_source)</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2.对DataLoader一组的图像进行遍历</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    custom_dataloader <span class="op">=</span> torch.utils.data.DataLoader(</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>        custom_dataset,  <span class="co"># 表示要对哪个dataset进行打包，【复用了上面的custom_dataset】</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        batch_size<span class="op">=</span><span class="dv">2</span>,            </span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        shuffle<span class="op">=</span><span class="va">False</span>,        </span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        drop_last<span class="op">=</span><span class="va">True</span>,        </span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>        <span class="co"># collate_fn=functools.partial(centercrop_collate_fn, crop_size=384),</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>        collate_fn<span class="op">=</span>CenterCrop_Collater(crop_size<span class="op">=</span><span class="dv">384</span>),   </span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># sampler=my_sampler(custom_dataset),          </span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>        <span class="co"># batch_sampler = None </span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> custom_data <span class="kw">in</span> custom_dataloader:</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>        <span class="co"># images, cond_images, prompts = custom_data["gray_image"], custom_data["cond_image"], custom_data["prompt"]  # collate_fn的返回类型是dict则可以用这一行</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        images, cond_images, prompts <span class="op">=</span> custom_data</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        images[<span class="dv">0</span>].save(<span class="st">"img.png"</span>)</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>        cond_images[<span class="dv">0</span>].save(<span class="st">"cond_img.png"</span>)</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(prompts[<span class="dv">0</span>])</span></code></pre></div>
+<p>其他要注意的事项：</p>
+<ul>
+<li><p>DataLoader最终返回的每个batch中的元素必须是在<code>tensors, numpy arrays, numbers, dicts or lists</code>中，而不能包含<code>PIL.Image.Image</code>等其他类型，所以'要么Dataset的<code>__getitem__</code>返回就是符合要求的，要么collate_fn的返回类型是符合要求""的。</p>
+<blockquote>
+<ul>
+<li><p>比如把collate_fn置为None，那么就会报错"TypeError:
+default_collate: batch must contain tensors, numpy arrays, numbers,
+dicts or lists; found &lt;class
+'PIL.Image.Image'&gt;"，这时候如果再将Dataset的<code>__getitem__</code>的返回从PIL.Image变成np.darray就又ok了</p></li>
+<li><p>但是可以把其他不符合要求的类型打包在dicts或者lists中，比如上面collate_fn中返回的tuple或者dict</p></li>
+</ul>
+</blockquote></li>
+<li><p>如果每组数据之间没有关联，那么其实在dataset的<code>__getitem__</code>中把数据都单独处理完就行了(比如resize、crop、to_tensor等)，那么collate_fn写成None就行</p></li>
+<li><p>DataLoader其实还有<code>batch_sampler</code>参数，其是对sampler生成的indices再打包分组，得到一个又一个batch的index，不过一般用不到这么复杂的</p></li>
+<li><p>sampler参数定义每次从dataset中采样的规则，在其不为None时候则要求shuffle必须为False</p></li>
+<li><p>pytorch中也提供了多种采样方式：</p>
+<ul>
+<li><p>SequentialSampler: 顺序采样</p></li>
+<li><p>RandomSampler: 随机采样</p></li>
+<li><p>WeightedSampler: 权重采样</p></li>
+<li><p>SubsetRandomSampler: 子集部分采样</p></li>
+<li><p>...</p></li>
+</ul></li>
+</ul>
+<h1 id="dataset库">dataset库</h1>
+<p>除了上面介绍的pytorch中自带的数据加载API，随着HuggingFace在<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/index">Transformers</a>和<a target="_blank" rel="noopener" href="https://huggingface.co/docs/diffusers/index">Diffusers</a>的影响力，其下的<a target="_blank" rel="noopener" href="https://huggingface.co/docs/datasets/index">dataset库</a>也逐渐受到学术界和工业界的重视。</p>
+<h2 id="自动下载社区已有数据集">自动下载社区已有数据集</h2>
+<p>dataset库允许我们使用<code>load_dataset</code>函数直接通过一句话在线下载HuggingFace社区已经有的数据集，一般有两种形式：</p>
+<ul>
+<li>直接指定数据集名称。(一般是HuggingFace上的“用户名/数据集名”)</li>
+<li>通过自定义的脚本，其实本质还是脚本内指定了数据集名称。(至于该脚本怎么写后面会进一步介绍，这里先用<a target="_blank" rel="noopener" href="https://huggingface.co/datasets/fusing/fill50k/blob/main/fill50k.py">现成的</a>)</li>
+</ul>
+<p>比如下面一句话下载可用于ControlNet训练的数据集<a target="_blank" rel="noopener" href="https://huggingface.co/datasets/fusing/fill50k">fusing/fill50k</a>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset, load_from_disk</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1.使用数据集名下载</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>my_dataset <span class="op">=</span> load_dataset(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                                                path<span class="op">=</span><span class="st">'fusing/fill50k'</span>  <span class="co"># 指定数据集名称</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                          split<span class="op">=</span><span class="st">'train'</span>,   <span class="co"># 指定下在训练集合还是测试集合，不指定则全部下载</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                          <span class="co"># 指定cache_dir下载到缓存路径，且下次在加载的时候优先从缓存中加载，避免重复下载</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                          <span class="co"># 否则默认下载到hugging_face数据根目录下：~/.cache/huggingface/datasets</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                          cache_dir<span class="op">=</span><span class="st">"./dataset_demo/test/fill50k_auto_down"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 2.使用自定义脚本下载</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>git_down_dataset <span class="op">=</span> load_dataset(path<span class="op">=</span><span class="st">"./dataset_demo/test/fill50k_git_down/fill50k.py"</span>,  <span class="co"># 指定加载脚本</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                                split<span class="op">=</span><span class="st">'train'</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                                cache_dir<span class="op">=</span><span class="st">"./dataset_demo/test/fill50k_auto_down_script"</span>)</span></code></pre></div>
+<p>当然我们也可以通过<code>save_to_disk</code>将数据集保存到我们指定的位置，并通过<code>load_from_disk</code>再加载进来：</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>auto_down_dataset.save_to_disk(<span class="st">"./dataset_demo/test/fill50k_auto_down"</span>)  </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>auto_down_dataset <span class="op">=</span> load_from_disk(<span class="st">"./dataset_demo/test/fill50k_auto_down"</span>)</span></code></pre></div>
+<p>其中<code>save_to_disk</code>会生成一些额外的数据和文件【因为该数据集只有训练集，所以没有test文件夹】，上面两中方式下载和添加后的文件是一致的，如下图所示:</p>
+<p><img src="/2024/06/12/Pytorch-%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD/save_to_disk后文件变化.png" alt="save_to_disk后文件变化" style="zoom: 40%;"></p>
+<h2 id="git下载好后本地加载">Git下载好后本地加载</h2>
+<p>预先通过Git下载好数据集好，可以直接加载数据集</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 先git下载数据集：git clone https://huggingface.co/datasets/fusing/fill50k</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>git_down_dataset <span class="op">=</span> load_dataset(<span class="st">"./dataset_demo/test/fill50k_git_down"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>git_down_dataset.save_to_disk(<span class="st">"./dataset_demo/test/fill50k_git_down"</span>)   </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(git_down_dataset)</span></code></pre></div>
+<h2 id="imagefolder加载">ImageFolder加载</h2>
+<p>ImageFolder允许我们通过很简单的方式加载我们自定义的数据集，比如我们现在拥有一下目录结构的数据</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode py"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>image_imagefolder <span class="op">=</span> load_dataset( path<span class="op">=</span><span class="st">"imagefolder"</span>, </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                                                                data_dir<span class="op">=</span><span class="st">"./dataset_demo/test/fill50k_imagefolder"</span>, </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                                                                drop_labels<span class="op">=</span><span class="va">False</span> <span class="co"># 设置为False，则train/test下根据文件夹分类别，得到"label"字段)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(image_imagefolder)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(image_imagefolder[<span class="st">"train"</span>][<span class="dv">0</span>])</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="st">输出：</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="st">DatasetDict({</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="st">    train: Dataset({</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="st">        features: ['image', 'label', 'prompt'],</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="st">        num_rows: 8</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="st">    })</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="st">    test: Dataset({</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="st">        features: ['image', 'label', 'prompt'],</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="st">        num_rows: 8</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="st">    })</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="st">})</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="st">{'image': &lt;PIL.PngImagePlugin.PngImageFile image mode=RGB size=512x512 at 0x2A12C0040&gt;, </span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="st"> 'label': 0, </span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="st"> 'prompt': 'pale golden rod circle with old lace background'}</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span></span></code></pre></div>
+<p>其中<code>"./dataset_demo/test/fill50k_imagefolder"</code>的目录结构如下：</p>
+<figure>
+<img src="/2024/06/12/Pytorch-%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD/imagefolder数据结构示例.png" alt="imagefolder数据结构示例">
+<figcaption aria-hidden="true">imagefolder数据结构示例</figcaption>
+</figure>
+<h2 id="dataset.from_dict加载">Dataset.from_dict加载</h2>
+<p>上面的ImageFolder支持我们快速加载数据，但是无法支持更加复杂的数据，而</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> Dataset, Image</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> transforms</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 按照下面的形式定义数据，如果是图片数据则传入图像路径</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 沿用上面fill50k_imagefolder的数据</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>data_dict <span class="op">=</span> {</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"pixel_values"</span>:[</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"./dataset_demo/test/fill50k_imagefolder/train/images/0.png"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"./dataset_demo/test/fill50k_imagefolder/train/images/1.png"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"./dataset_demo/test/fill50k_imagefolder/train/images/2.png"</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"./dataset_demo/test/fill50k_imagefolder/train/images/3.png"</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"conditioning_pixel_values"</span>:[</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"./dataset_demo/test/fill50k_imagefolder/train/conditioning_images/0.png"</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"./dataset_demo/test/fill50k_imagefolder/train/conditioning_images/1.png"</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"./dataset_demo/test/fill50k_imagefolder/train/conditioning_images/2.png"</span>,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"./dataset_demo/test/fill50k_imagefolder/train/conditioning_images/3.png"</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prompts"</span>:[<span class="st">"pale golden rod circle with old lace background"</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>               <span class="st">"light coral circle with white background"</span>,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>               <span class="st">"aqua circle with light pink background"</span>,</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>               <span class="st">"cornflower blue circle with light golden rod yellow background"</span>]</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>my_vis_dataset <span class="op">=</span> Dataset.from_dict(data_dict)  <span class="co"># 加载数据</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(my_vis_dataset)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">输出：</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">Dataset({</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">    features: ['pixel_values', 'conditioning_pixel_values', 'prompts'],</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">    num_rows: 4</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">})</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(my_vis_dataset[<span class="dv">0</span>][<span class="st">"pixel_values"</span>])  <span class="co"># 这时候仍然是str类型的图像路径</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>my_vis_dataset <span class="op">=</span> my_vis_dataset.cast_column(<span class="st">"pixel_values"</span>, Image())  <span class="co"># 利用cast_column将路径转为PIL图像数据</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(my_vis_dataset[<span class="dv">0</span>][<span class="st">"pixel_values"</span>])   <span class="co"># 转为PIL的图像形式了(当然是并未做过任何归一化等处理)</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>my_vis_dataset <span class="op">=</span> my_vis_dataset.cast_column(<span class="st">"conditioning_pixel_values"</span>, Image())</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> custom_mapping(examples):</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 这里使用map对数据集进行操作，比如这里将图像缩放到256</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    examples[<span class="st">"pixel_values"</span>] <span class="op">=</span> [image.convert(<span class="st">"RGB"</span>).resize((<span class="dv">256</span>, <span class="dv">256</span>)) <span class="cf">for</span> image <span class="kw">in</span> examples[<span class="st">"pixel_values"</span>]]</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    examples[<span class="st">"conditioning_pixel_values"</span>] <span class="op">=</span> [image.convert(<span class="st">"RGB"</span>).resize((<span class="dv">256</span>, <span class="dv">256</span>)) <span class="cf">for</span> image <span class="kw">in</span> examples[<span class="st">"conditioning_pixel_values"</span>]]</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>    examples[<span class="st">"prompts"</span>] <span class="op">=</span> [<span class="st">"add_"</span><span class="op">+</span>prompt <span class="cf">for</span> prompt <span class="kw">in</span> examples[<span class="st">"prompts"</span>]]</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> examples</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="co"># 如果有必要可以使用map()函数对数据集中再进行处理(比如对这里将图像resize，或者修改prompt)</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>my_vis_dataset <span class="op">=</span> my_vis_dataset.<span class="bu">map</span>(custom_mapping, batched<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Dataset.from_dict返回的结果是可以直接作为DataLoader的dataset</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="co"># 当然也要符合基本的要求，比如上面提到的，如果dataset返回形式有PIL，则需要转为tensor或numpy等符合要求的形式</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="co"># 比如这里可以提前使用with_transform进行一些变换</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prepare_train_dataset(dataset):</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>    image_transforms <span class="op">=</span> transforms.Compose(</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>            transforms.Resize(<span class="dv">512</span>, interpolation<span class="op">=</span>transforms.InterpolationMode.BILINEAR),</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>            transforms.CenterCrop(<span class="dv">256</span>),</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>            transforms.ToTensor(),</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>            transforms.Normalize([<span class="fl">0.5</span>], [<span class="fl">0.5</span>]),</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> preprocess_train(examples):</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>        images <span class="op">=</span> [image.convert(<span class="st">"RGB"</span>) <span class="cf">for</span> image <span class="kw">in</span> examples[<span class="st">"pixel_values"</span>]]</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>        images <span class="op">=</span> [image_transforms(image) <span class="cf">for</span> image <span class="kw">in</span> images]</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>        examples[<span class="st">"pixel_values"</span>] <span class="op">=</span> images</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>        conditioning_images <span class="op">=</span> [image.convert(<span class="st">"RGB"</span>) <span class="cf">for</span> image <span class="kw">in</span> examples[<span class="st">"conditioning_pixel_values"</span>]]</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>        conditioning_images <span class="op">=</span> [image_transforms(image) <span class="cf">for</span> image <span class="kw">in</span> conditioning_images]</span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>        examples[<span class="st">"conditioning_pixel_values"</span>] <span class="op">=</span> conditioning_images</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> examples</span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dataset.with_transform(preprocess_train)</span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>my_vis_dataset <span class="op">=</span> prepare_train_dataset(my_vis_dataset)</span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>my_data_loader <span class="op">=</span> torch.utils.data.DataLoader(my_vis_dataset, shuffle<span class="op">=</span><span class="va">True</span>, batch_size<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> step, batch <span class="kw">in</span> <span class="bu">enumerate</span>(my_data_loader):</span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>    pixel_values <span class="op">=</span> batch[<span class="st">"pixel_values"</span>].permute(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">1</span>).numpy()[<span class="dv">0</span>]</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>    pixel_values <span class="op">=</span> (pixel_values <span class="op">*</span> <span class="fl">0.5</span>) <span class="op">+</span> <span class="fl">0.5</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>    pixel_values <span class="op">=</span> (pixel_values <span class="op">*</span> <span class="fl">255.0</span>).astype(np.uint8)</span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>    conditioning_pixel_values <span class="op">=</span> batch[<span class="st">"conditioning_pixel_values"</span>].permute(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">1</span>).numpy()[<span class="dv">0</span>]</span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a>    conditioning_pixel_values <span class="op">=</span> (conditioning_pixel_values <span class="op">*</span> <span class="fl">0.5</span>) <span class="op">+</span> <span class="fl">0.5</span></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>    conditioning_pixel_values <span class="op">=</span> (conditioning_pixel_values <span class="op">*</span> <span class="fl">255.0</span>).astype(np.uint8)</span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">=</span> batch[<span class="st">"prompts"</span>]</span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"prompt:"</span>, prompt)</span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>    cv2.imshow(<span class="st">"pixel_values"</span>, </span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>               cv2.cvtColor(np.concatenate([pixel_values, </span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>                                            conditioning_pixel_values], axis<span class="op">=</span><span class="dv">1</span>), </span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>                            cv2.COLOR_RGB2BGR))</span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>    cv2.waitKey()</span></code></pre></div>
+<h2 id="自定义脚本加载">自定义脚本加载</h2>
+<p>其实上面<code>Dataset.from_dict</code>已经能够满足我们大多数的情况了，但是HuggingFace中很多有通过脚本下载数据的情况，包括上面通过脚本自动下载社区数据的情况。</p>
+<p>这里我们定义一个脚本来处理下面这种结构的数据:</p>
+<figure>
+<img src="/2024/06/12/Pytorch-%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD/脚本下载的数据结构示例.png" alt="脚本下载的数据结构示例">
+<figcaption aria-hidden="true">脚本下载的数据结构示例</figcaption>
+</figure>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dataset_script <span class="op">=</span> load_dataset(path<span class="op">=</span><span class="st">"./dataset_demo/test/fill50k_script/fill50k_custom.py"</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                              cache_dir<span class="op">=</span><span class="st">"./dataset_demo/test/fill50k_script"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                              trust_remote_code<span class="op">=</span><span class="va">True</span>)   <span class="co"># 设置为True否则会询问你是否信任直接加载数据</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dataset_script)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">输出：</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">DatasetDict({</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">    train: Dataset({</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">        features: ['image', 'conditioning_image', 'text'],</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">        num_rows: 4</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">    })</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">})</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span></code></pre></div>
+<p>其中fill50k_custom.py中主要是定义了继承<code>datasets.GeneratorBasedBuilder</code>的类，该类要重写三个方法：</p>
+<ul>
+<li>**_info(self):** 用于描述该数据集，比如homepage、license等,</li>
+<li>**_split_generators(self, dl_manager):**
+用于划分数据集(训练/测试等)</li>
+<li>**_generate_examples(self, dl_manager):**
+对每个数据集进行处理(比如读取图片等)</li>
+</ul>
+<p>完整的<code>fill50k_custom.py</code>代码如下</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> Image</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> datasets</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> logging</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>_VERSION <span class="op">=</span> datasets.Version(<span class="st">"0.0.2"</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 数据集路径设置(因为这里是从本地读取数据，所以这里要指定数据集路径)</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 如果要从huggface下载数据，要用到hf_hub_url()和dl_manager.download()函数，具体可以去看原本的fill50k.py</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>META_DATA_PATH <span class="op">=</span> <span class="st">"./dataset_demo/test/fill50k_script/train.jsonl"</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>IMAGE_DIR <span class="op">=</span> <span class="st">"./dataset_demo/test/fill50k_script"</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>CONDITION_IMAGE_DIR <span class="op">=</span> <span class="st">"./dataset_demo/test/fill50k_script"</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 定义数据集中有哪些特征，及其类型</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>_FEATURES <span class="op">=</span> datasets.Features(</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"image"</span>: datasets.Image(),   <span class="co"># 数据名称和类型，注意这里数据名称要和train.jsonl一致</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"conditioning_image"</span>: datasets.Image(),</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"text"</span>: datasets.Value(<span class="st">"string"</span>),</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>_DEFAULT_CONFIG <span class="op">=</span> datasets.BuilderConfig(name<span class="op">=</span><span class="st">"default"</span>, version<span class="op">=</span>_VERSION)</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="co"># 定义数据集</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> My_Fill50k(datasets.GeneratorBasedBuilder):</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    BUILDER_CONFIGS <span class="op">=</span> [_DEFAULT_CONFIG]</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    DEFAULT_CONFIG_NAME <span class="op">=</span> <span class="st">"default"</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _info(<span class="va">self</span>):</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> datasets.DatasetInfo(</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>            description<span class="op">=</span><span class="st">"None"</span>,</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>            features<span class="op">=</span>_FEATURES,</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>            supervised_keys<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>            homepage<span class="op">=</span><span class="st">"None"</span>,</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>            license<span class="op">=</span><span class="st">"None"</span>,</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>            citation<span class="op">=</span><span class="st">"None"</span>,</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _split_generators(<span class="va">self</span>, dl_manager):</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>            datasets.SplitGenerator(</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>                name<span class="op">=</span>datasets.Split.TRAIN,</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>                <span class="co"># These kwargs will be passed to _generate_examples</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>                <span class="co"># 这里是将图像全部用于训练集合了，当然也可以读取每个路径下的文件路径，然后划分训练/测试，重新传参数</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>                <span class="co"># 下面的参数是和_generate_examples函数的入口参数对齐的</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>                gen_kwargs<span class="op">=</span>{</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"metadata_path"</span>: META_DATA_PATH,</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"images_dir"</span>: IMAGE_DIR,</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"conditioning_images_dir"</span>: CONDITION_IMAGE_DIR,</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 输入参数是和_split_generators返回的dict中的gen_kwargs参数对应的</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _generate_examples(<span class="va">self</span>, metadata_path, images_dir, conditioning_images_dir):</span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>        metadata <span class="op">=</span> pd.read_json(metadata_path, lines<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _, row <span class="kw">in</span> metadata.iterrows():</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>            text <span class="op">=</span> row[<span class="st">"text"</span>]  <span class="co"># 这里的key是和train.jsonl文件中对应的</span></span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>            image_path <span class="op">=</span> os.path.join(images_dir, row[<span class="st">"image"</span>])</span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>            image <span class="op">=</span> <span class="bu">open</span>(image_path, <span class="st">"rb"</span>).read() <span class="co"># 可以保存成二进制形式</span></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>            <span class="co"># image = Image.open(image_path)  # 也可以保存成PIL形式</span></span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>            conditioning_image_path <span class="op">=</span> os.path.join(conditioning_images_dir, row[<span class="st">"conditioning_image"</span>])</span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>            conditioning_image <span class="op">=</span> <span class="bu">open</span>(conditioning_image_path, <span class="st">"rb"</span>).read()</span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>            <span class="co"># conditioning_image = Image.open(conditioning_image_path)</span></span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> row[<span class="st">"image"</span>], {</span>
+<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a>                <span class="st">"text"</span>: text,  <span class="co"># 这里的key是和_FEATURES相同的</span></span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a>                <span class="st">"image"</span>: {</span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: image_path,</span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: image,</span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a>                <span class="st">"conditioning_image"</span>: {</span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: conditioning_image_path,</span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: conditioning_image,</span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a>            }</span></code></pre></div>
+<h2 id="webdataset加载本地数据集">webdataset加载本地数据集</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/webdataset/webdataset">webdataset</a>是一种tar压缩包形式的数据存储形式，比较适合数据量比较大的情况下：</p>
+<p>比如我们有以下一组数据，其中<code>image</code>后缀和<code>conditioning_image</code>后缀就是直接将png图片后缀从png改过来的，<code>prompt</code>后缀也是从<code>txt/jsonl</code>后缀改过来的，每一组的数据使用相同的文件名，相同特征的数据用相同的后缀名:</p>
+<p><img src="/2024/06/12/Pytorch-%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD/webdataset数据结构示例.png" alt="webdataset数据结构示例" style="zoom: 50%;"></p>
+<p>我们先用tar命令将数据打包：</p>
+<pre><code>tar --sort=name -cf tar1.tar tar1   # --sort=name命令一定要加</code></pre>
+<p>将数据集打包后就可以直接用<code>load_dataset("webdataset",...）</code>进行读取了：</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>webdataset_data <span class="op">=</span> load_dataset(<span class="st">"webdataset"</span>,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>             data_files<span class="op">=</span>{<span class="st">"train"</span>: [<span class="st">"./dataset_demo/test/fill50k_webdataset/tar1.tar"</span>]},</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>             split<span class="op">=</span><span class="st">"train"</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>             streaming<span class="op">=</span><span class="va">True</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>             )</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(webdataset_data)  <span class="co"># IterableDataset类型，也是可以直接用DataLoader包装的</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">输出：</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">IterableDataset({</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">    features: ['__key__', '__url__', 'conditioning_image', 'image', 'prompt'],</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">    n_shards: 1</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">})</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> item <span class="kw">in</span> webdataset_data:</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 所以数据都会保存为bytes形式，这里进行decode还原数据</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    image <span class="op">=</span> cv2.imdecode(np.asarray(<span class="bu">bytearray</span>(item[<span class="st">"image"</span>]), dtype<span class="op">=</span><span class="st">"uint8"</span>), cv2.IMREAD_COLOR)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    conditioning_image <span class="op">=</span> cv2.imdecode(np.asarray(<span class="bu">bytearray</span>(item[<span class="st">"conditioning_image"</span>]), dtype<span class="op">=</span><span class="st">"uint8"</span>), cv2.IMREAD_COLOR)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    json_info <span class="op">=</span> item[<span class="st">"prompt"</span>].decode(<span class="st">'utf-8'</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(json_info)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    cv2.imshow(<span class="st">"result"</span>, np.concatenate([image, conditioning_image], axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    cv2.waitKey()</span></code></pre></div>
+<h1 id="总结">总结</h1>
+<p>本篇文章主要通过具体的实例，介绍了PyTorch中数据加载的机制，同时也介绍了目前<a target="_blank" rel="noopener" href="https://huggingface.co/docs/datasets/index">dataset库</a>常用的几种数据加载方式。这些强大的数据读取与加载机制，能够让我们极大程度减少在数据加载上的精力，而更加专注模型结构的设计与训练。</p>
+</article><section class="jump-container is-flex is-justify-content-space-between my-6"><!-- em is empty placeholder--><a class="button is-default" href="/2024/06/30/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E9%98%B4%E5%BD%B1%E7%94%9F%E6%88%90(Shadow%20Generation)/" title="论文笔记-阴影生成"><i class="iconfont icon-prev mr-2 has-text-grey"></i><span class="has-text-weight-semibold">Previous: 论文笔记-阴影生成</span></a><a class="button is-default" href="/2024/03/10/Diffusion%E5%AD%A6%E4%B9%A07-DiT/" title="Diffusion学习7-DiT"><span class="has-text-weight-semibold">Next: Diffusion学习7-DiT</span><i class="iconfont icon-next ml-2 has-text-grey"></i></a></section><article class="mt-6 comment-container"><script async repo="qzq2514/qzq2514.github.io" src="https://utteranc.es/client.js" issue-term="pathname" theme="preferred-color-scheme"></script></article></div></div></main></main><footer class="is-flex is-flex-direction-column is-align-items-center is-flex-shrink-0 is-family-serif"><section class="sns-container"><a title="twitter" target="_blank" rel="noopener nofollow" href="//twitter.com/qzq2514"><i class="iconfont icon-twitter"></i></a><!-- Github--><a title="github" target="_blank" rel="noopener nofollow" href="//github.com/qzq2514"><i class="iconfont icon-github"></i></a><!-- Ins--><a title="instagram" target="_blank" rel="noopener nofollow" href="//www.instagram.com/qzq2514"><i class="iconfont icon-ins"></i></a><!-- publish--><a title="publish" target="_blank" rel="noopener nofollow" href="https://blog.csdn.net/qzq2514"><i class="iconfont icon-rss"></i></a><!-- RSS--><!-- 知乎--><a title="zhihu" target="_blank" rel="noopener nofollow" href="//zhihu.com/people/qi-zhong-qi-62"><i class="iconfont icon-zhihu"></i></a><!-- 领英--><!-- 脸书--></section><p><span>Copyright ©</span><span> Georgeqi 2024</span></p><div class="is-flex is-justify-content-center is-flex-wrap-wrap"></div><div><span></span></div></footer><script async defer src="https://buttons.github.io/buttons.js"></script><script src="/js/jquery-3.6.1.min.js"></script><script src="/js/jquery-fancybox.min.js"></script><script src="/js/img_zoom.js"></script><script src="/js/post.js"></script></body></html>
