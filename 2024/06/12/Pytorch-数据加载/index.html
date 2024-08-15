@@ -502,83 +502,84 @@ dicts or lists; found &lt;class
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 定义数据集中有哪些特征，及其类型</span></span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>_FEATURES <span class="op">=</span> datasets.Features(</span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"image"</span>: datasets.Image(),   <span class="co"># 数据名称和类型，注意这里数据名称要和train.jsonl一致</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"conditioning_image"</span>: datasets.Image(),</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"text"</span>: datasets.Value(<span class="st">"string"</span>),</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>_DEFAULT_CONFIG <span class="op">=</span> datasets.BuilderConfig(name<span class="op">=</span><span class="st">"default"</span>, version<span class="op">=</span>_VERSION)</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="co"># 定义数据集</span></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> My_Fill50k(datasets.GeneratorBasedBuilder):</span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    BUILDER_CONFIGS <span class="op">=</span> [_DEFAULT_CONFIG]</span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    DEFAULT_CONFIG_NAME <span class="op">=</span> <span class="st">"default"</span></span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _info(<span class="va">self</span>):</span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> datasets.DatasetInfo(</span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>            description<span class="op">=</span><span class="st">"None"</span>,</span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>            features<span class="op">=</span>_FEATURES,</span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>            supervised_keys<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>            homepage<span class="op">=</span><span class="st">"None"</span>,</span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>            license<span class="op">=</span><span class="st">"None"</span>,</span>
-<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>            citation<span class="op">=</span><span class="st">"None"</span>,</span>
-<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _split_generators(<span class="va">self</span>, dl_manager):</span>
-<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>        metadata_path <span class="op">=</span> dl_manager.download(META_DATA_PATH)</span>
-<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        images_dir <span class="op">=</span> dl_manager.download(IMAGE_DIR)</span>
-<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>        conditioning_images_dir <span class="op">=</span> dl_manager.download(CONDITION_IMAGE_DIR)</span>
-<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 上面的操作其实就是利用dl_manager.download下载hf_hub_url，并且拼接一些路径</span></span>
-<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 所以这里如果就是从本地下载可以抛弃dl_manager.download，直接赋值三个路径就行：</span></span>
-<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''</span></span>
-<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a><span class="co">        metadata_path = "./dataset_demo/test/fill50k_script/train.jsonl"</span></span>
-<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="co">        images_dir = "./dataset_demo/test/fill50k_script"</span></span>
-<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a><span class="co">        conditioning_images_dir = "./dataset_demo/test/fill50k_script"</span></span>
-<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="co">        '''</span></span>
-<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
-<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>            datasets.SplitGenerator(</span>
-<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>                name<span class="op">=</span>datasets.Split.TRAIN,</span>
-<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>                <span class="co"># These kwargs will be passed to _generate_examples</span></span>
-<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>                <span class="co"># 这里是将图像全部用于训练集合了，当然也可以读取每个路径下的文件路径，然后划分训练/测试，重新传参数</span></span>
-<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>                <span class="co"># 下面的参数是和_generate_examples函数的入口参数对齐的</span></span>
-<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>                gen_kwargs<span class="op">=</span>{</span>
-<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"metadata_path"</span>: metadata_path,</span>
-<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"images_dir"</span>: images_dir,</span>
-<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"conditioning_images_dir"</span>: conditioning_images_dir,</span>
-<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>                },</span>
-<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>            ),</span>
-<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>        ]</span>
-<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 输入参数是和_split_generators返回的dict中的gen_kwargs参数对应的</span></span>
-<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _generate_examples(<span class="va">self</span>, metadata_path, images_dir, conditioning_images_dir):</span>
-<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>        metadata <span class="op">=</span> pd.read_json(metadata_path, lines<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _, row <span class="kw">in</span> metadata.iterrows():</span>
-<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>            text <span class="op">=</span> row[<span class="st">"text"</span>]  <span class="co"># 这里的key是和train.jsonl文件中对应的</span></span>
-<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>            image_path <span class="op">=</span> os.path.join(images_dir, row[<span class="st">"image"</span>])</span>
-<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"image_path-----2"</span>)</span>
-<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>            image <span class="op">=</span> <span class="bu">open</span>(image_path, <span class="st">"rb"</span>).read() <span class="co"># 可以保存成二进制形式</span></span>
-<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>            <span class="co"># image = Image.open(image_path)  # 也可以保存成PIL形式</span></span>
-<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>            conditioning_image_path <span class="op">=</span> os.path.join(conditioning_images_dir, row[<span class="st">"conditioning_image"</span>])</span>
-<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>            conditioning_image <span class="op">=</span> <span class="bu">open</span>(conditioning_image_path, <span class="st">"rb"</span>).read()</span>
-<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>            <span class="co"># conditioning_image = Image.open(conditioning_image_path)</span></span>
-<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 定义数据名称和类型，注意这里数据名称不一定要和train.jsonl中的一致，</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 但是这个key是最为最终dataset的column_names</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"image"</span>: datasets.Image(),   </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"conditioning_image"</span>: datasets.Image(),</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"text"</span>: datasets.Value(<span class="st">"string"</span>),</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>_DEFAULT_CONFIG <span class="op">=</span> datasets.BuilderConfig(name<span class="op">=</span><span class="st">"default"</span>, version<span class="op">=</span>_VERSION)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="co"># 定义数据集</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> My_Fill50k(datasets.GeneratorBasedBuilder):</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    BUILDER_CONFIGS <span class="op">=</span> [_DEFAULT_CONFIG]</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    DEFAULT_CONFIG_NAME <span class="op">=</span> <span class="st">"default"</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _info(<span class="va">self</span>):</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> datasets.DatasetInfo(</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>            description<span class="op">=</span><span class="st">"None"</span>,</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>            features<span class="op">=</span>_FEATURES,</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>            supervised_keys<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>            homepage<span class="op">=</span><span class="st">"None"</span>,</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>            license<span class="op">=</span><span class="st">"None"</span>,</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>            citation<span class="op">=</span><span class="st">"None"</span>,</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _split_generators(<span class="va">self</span>, dl_manager):</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>        metadata_path <span class="op">=</span> dl_manager.download(META_DATA_PATH)</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>        images_dir <span class="op">=</span> dl_manager.download(IMAGE_DIR)</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>        conditioning_images_dir <span class="op">=</span> dl_manager.download(CONDITION_IMAGE_DIR)</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 上面的操作其实就是利用dl_manager.download下载hf_hub_url，并且拼接一些路径</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 所以这里如果就是从本地下载可以抛弃dl_manager.download，直接赋值三个路径就行：</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a><span class="co">        metadata_path = "./dataset_demo/test/fill50k_script/train.jsonl"</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="co">        images_dir = "./dataset_demo/test/fill50k_script"</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a><span class="co">        conditioning_images_dir = "./dataset_demo/test/fill50k_script"</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a><span class="co">        '''</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>            datasets.SplitGenerator(</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>                name<span class="op">=</span>datasets.Split.TRAIN,</span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>                <span class="co"># These kwargs will be passed to _generate_examples</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>                <span class="co"># 这里是将图像全部用于训练集合了，当然也可以读取每个路径下的文件路径，然后划分训练/测试，重新传参数</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>                <span class="co"># 下面的参数是和_generate_examples函数的入口参数对齐的</span></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>                gen_kwargs<span class="op">=</span>{</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"metadata_path"</span>: metadata_path,</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"images_dir"</span>: images_dir,</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"conditioning_images_dir"</span>: conditioning_images_dir,</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 输入参数是和_split_generators返回的dict中的gen_kwargs参数对应的</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _generate_examples(<span class="va">self</span>, metadata_path, images_dir, conditioning_images_dir):</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>        metadata <span class="op">=</span> pd.read_json(metadata_path, lines<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _, row <span class="kw">in</span> metadata.iterrows():</span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>            text <span class="op">=</span> row[<span class="st">"text"</span>]  <span class="co"># 这里的key是和train.jsonl文件中对应的</span></span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>            image_path <span class="op">=</span> os.path.join(images_dir, row[<span class="st">"image"</span>])</span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>            image <span class="op">=</span> <span class="bu">open</span>(image_path, <span class="st">"rb"</span>).read() <span class="co"># 可以保存成二进制形式</span></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>            <span class="co"># image = Image.open(image_path)  # 也可以保存成PIL形式</span></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>            conditioning_image_path <span class="op">=</span> os.path.join(conditioning_images_dir, row[<span class="st">"conditioning_image"</span>])</span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>            conditioning_image <span class="op">=</span> <span class="bu">open</span>(conditioning_image_path, <span class="st">"rb"</span>).read()</span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>            <span class="co"># conditioning_image = Image.open(conditioning_image_path)</span></span>
 <span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> row[<span class="st">"image"</span>], {</span>
-<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>                <span class="st">"text"</span>: text,  <span class="co"># 这里的key是和_FEATURES相同的</span></span>
-<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>                <span class="st">"image"</span>: {</span>
-<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: image_path,</span>
-<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: image,</span>
-<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a>                },</span>
-<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a>                <span class="st">"conditioning_image"</span>: {</span>
-<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: conditioning_image_path,</span>
-<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: conditioning_image,</span>
-<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a>                },</span>
-<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a>            }</span></code></pre></div>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> row[<span class="st">"image"</span>], {</span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>                <span class="st">"text"</span>: text,  <span class="co"># 这里的key要和_FEATURES保持一直，也是用来作为最终dataset的column_names</span></span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>                <span class="st">"image"</span>: {</span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: image_path,</span>
+<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: image,</span>
+<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a>                <span class="st">"conditioning_image"</span>: {</span>
+<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: conditioning_image_path,</span>
+<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: conditioning_image,</span>
+<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a>            }</span></code></pre></div>
 <h2 id="webdataset加载">webdataset加载</h2>
 <p><a target="_blank" rel="noopener" href="https://github.com/webdataset/webdataset">webdataset</a>是一种tar压缩包形式的数据存储形式，比较适合数据量比较大的情况下：</p>
 <p>比如我们有以下一组数据，其中<code>image</code>后缀和<code>conditioning_image</code>后缀就是直接将png图片后缀从png改过来的，<code>prompt</code>后缀也是从<code>txt/jsonl</code>后缀改过来的，每一组的数据使用相同的文件名，相同特征的数据用相同的后缀名:</p>
