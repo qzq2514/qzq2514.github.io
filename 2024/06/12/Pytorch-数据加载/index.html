@@ -561,25 +561,37 @@ dicts or lists; found &lt;class
 <span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>            text <span class="op">=</span> row[<span class="st">"text"</span>]  <span class="co"># 这里的key是和train.jsonl文件中对应的</span></span>
 <span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>            image_path <span class="op">=</span> os.path.join(images_dir, row[<span class="st">"image"</span>])</span>
-<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>            image <span class="op">=</span> <span class="bu">open</span>(image_path, <span class="st">"rb"</span>).read() <span class="co"># 可以保存成二进制形式</span></span>
-<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>            <span class="co"># image = Image.open(image_path)  # 也可以保存成PIL形式</span></span>
-<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>            conditioning_image_path <span class="op">=</span> os.path.join(conditioning_images_dir, row[<span class="st">"conditioning_image"</span>])</span>
-<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>            conditioning_image <span class="op">=</span> <span class="bu">open</span>(conditioning_image_path, <span class="st">"rb"</span>).read()</span>
-<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>            <span class="co"># conditioning_image = Image.open(conditioning_image_path)</span></span>
-<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> row[<span class="st">"image"</span>], {</span>
-<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>                <span class="st">"text"</span>: text,  <span class="co"># 这里的key要和_FEATURES保持一直，也是用来作为最终dataset的column_names</span></span>
-<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>                <span class="st">"image"</span>: {</span>
-<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: image_path,</span>
-<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: image,</span>
-<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a>                },</span>
-<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a>                <span class="st">"conditioning_image"</span>: {</span>
-<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: conditioning_image_path,</span>
-<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: conditioning_image,</span>
-<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a>                },</span>
-<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a>            }</span></code></pre></div>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>            image <span class="op">=</span> <span class="bu">open</span>(image_path, <span class="st">"rb"</span>).read() <span class="co"># 保存成二进制形式</span></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>            conditioning_image_path <span class="op">=</span> os.path.join(conditioning_images_dir, row[<span class="st">"conditioning_image"</span>])</span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>            conditioning_image <span class="op">=</span> <span class="bu">open</span>(conditioning_image_path, <span class="st">"rb"</span>).read()</span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>            <span class="co">'''</span></span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a><span class="co">            当然我们也可以对已有的数据做一些操作后再作为真正dataset数据</span></span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a><span class="co">            1.先读取pillow图像数据</span></span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a><span class="co">            image_pil = Image.open(image_path).convert("RGB")  </span></span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a><span class="co">            2.然后对image_pil做一些自定义的操作，比如取反...</span></span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a><span class="co">            image_pil = Image.eval(image_pil, lambda x: 255 - x)</span></span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a><span class="co">            3.最后再保存成bytes类型</span></span>
+<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a><span class="co">            image_bytes = io.BytesIO()  # 注意:这里不要使用cv2.imencode保存成bytes类型!!!不然会导致RGB顺序错乱</span></span>
+<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a><span class="co">            image_pil.save(image_bytes, format="JPEG")</span></span>
+<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a><span class="co">            image = image_bytes</span></span>
+<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a><span class="co">            </span></span>
+<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a><span class="co">            # with open("./show_img.png", "wb") as fw:</span></span>
+<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a><span class="co">            #     fw.write(image_bytes.getvalue())  # 这里可以保存后查看操作后的数据是不是符合预期的</span></span>
+<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a><span class="co">            '''</span></span>
+<span id="cb10-94"><a href="#cb10-94" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb10-95"><a href="#cb10-95" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> row[<span class="st">"image"</span>], {</span>
+<span id="cb10-96"><a href="#cb10-96" aria-hidden="true" tabindex="-1"></a>                <span class="st">"text"</span>: text,  <span class="co"># 这里的key要和_FEATURES保持一直，也是用来作为最终dataset的column_names</span></span>
+<span id="cb10-97"><a href="#cb10-97" aria-hidden="true" tabindex="-1"></a>                <span class="st">"image"</span>: {</span>
+<span id="cb10-98"><a href="#cb10-98" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: <span class="st">""</span>,  <span class="co"># 如果原始数据是经过操作的了，那么这里可以不指定'path'</span></span>
+<span id="cb10-99"><a href="#cb10-99" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: image,</span>
+<span id="cb10-100"><a href="#cb10-100" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb10-101"><a href="#cb10-101" aria-hidden="true" tabindex="-1"></a>                <span class="st">"conditioning_image"</span>: {</span>
+<span id="cb10-102"><a href="#cb10-102" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"path"</span>: conditioning_image_path,  <span class="co"># 同理这里也可以不指定'path'</span></span>
+<span id="cb10-103"><a href="#cb10-103" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"bytes"</span>: conditioning_image,</span>
+<span id="cb10-104"><a href="#cb10-104" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb10-105"><a href="#cb10-105" aria-hidden="true" tabindex="-1"></a>            }</span></code></pre></div>
 <h2 id="webdataset加载">webdataset加载</h2>
 <p><a target="_blank" rel="noopener" href="https://github.com/webdataset/webdataset">webdataset</a>是一种tar压缩包形式的数据存储形式，比较适合数据量比较大的情况下：</p>
 <p>比如我们有以下一组数据，其中<code>image</code>后缀和<code>conditioning_image</code>后缀就是直接将png图片后缀从png改过来的，<code>prompt</code>后缀也是从<code>txt/jsonl</code>后缀改过来的，每一组的数据使用相同的文件名，相同特征的数据用相同的后缀名:</p>
