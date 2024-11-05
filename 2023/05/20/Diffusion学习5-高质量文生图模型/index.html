@@ -641,11 +641,208 @@ Text-to-Image Generation》</p>
 <p>【<a target="_blank" rel="noopener" href="https://pixart-alpha.github.io/PixArt-sigma-project/">主页</a>】【<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2403.04692">论文</a>】【<a target="_blank" rel="noopener" href="https://github.com/PixArt-alpha/PixArt-sigma">代码</a>】【<a target="_blank" rel="noopener" href="https://huggingface.co/collections/PixArt-alpha/pixart-sigma-663625885ea4c28a8bdd0d44">HuggingFace</a>】</p>
 <h1 id="playground系列">Playground系列</h1>
 <h2 id="playground-v2.5">Playground v2.5</h2>
-<p>《Playground v2.5:Three insights towards enhancing aesthetic quality
-in text-to-image generation》</p>
+<p>《<strong>Playground v2.5:</strong> Three insights towards enhancing
+aesthetic quality in text-to-image generation》</p>
 <p>【<a target="_blank" rel="noopener" href="https://playground.com/blog/playground-v2-5">主页</a>】【<a target="_blank" rel="noopener" href="https://marketing-cdn.playground.com/research/pgv2.5_compressed.pdf">论文</a>】【<a target="_blank" rel="noopener" href="https://huggingface.co/playgroundai/playground-v2.5-1024px-aesthetic">HuggingFace</a>】</p>
+<ul>
+<li><p><strong>算法流程：</strong>本论文未介绍具体的模型框架和训练细节，更多像是一个简略的技术报告，从三个维度来提升文生图的质量：鲜艳颜色和对比度、多分辨率生成、人像细节。最终通过user
+study的方式表明新提出的Playground
+v2.5战胜了之前各种先进的开源和闭源文生图模型，诸如Midjourney 5.2、DALL·E
+3、Playground v2 [20]、PIXART-α和SDXL。</p></li>
+<li><p><strong>算法细节：</strong></p>
+<ul>
+<li><strong>提升颜色和对比度(enhancing color and contrast )</strong>
+<ul>
+<li><p>【之前模型存在的问题】：SDXL仍然难以生成纯色的图片或者纯色背景的图片(具体可见<a target="_blank" rel="noopener" href="https://qzq2514.github.io/2023/05/20/Diffusion学习5-高质量文生图模型/#训练-1">之前的博客</a>)，而<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2305.08891">这篇论文</a>指出该问题的主要原因在于：在diffusion扩散过程中，即使离散的噪声水平达到最大值，但是stable
+diffusion的信噪比仍然太高了(即不是完全的纯噪声)。虽然SDXL和PlaygroundV2.5的前一个版本(Playground
+v2)中都尝试使用了<a target="_blank" rel="noopener" href="https://www.crosslabs.org/blog/diffusion-with-offset-noise">noise-offset</a>的方式来缓解这个问题，但是该问题仍然没有被彻底解决。</p></li>
+<li><p>【本论文的解决方法】PlaygroundV2.5则使用了<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2206.00364">EDM算法</a>来解决这个问题，该算法有两个明显的优点：</p>
+<ol type="1">
+<li><p>与<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2305.08891">Zero Terminal
+SNR</a>算法一样，EDM在最后一个去噪步骤达到了接近于零的信噪比。</p></li>
+<li><p>EDM采用第一性原理方法来设计训练和采样过程，以及UNet的预处理。这能够帮助获得更好的图像质量和更快的模型收敛速度。</p>
+<p>想要更详细了解该算法的公式和细节，可去读原<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2206.00364">论文</a>。同时，playgroundv2.5还受到<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2301.11093">Simple
+diffusion</a>的启发，在对高分辨率图像进行训练时，将noise
+schedule向整体噪声更大的方向倾斜。</p></li>
+</ol></li>
+<li><p>【达到的效果】：</p>
+<p>在与SDXL和PlaygroundV2对比，本文的PlaygroundV2.5能够根据
+Prompt生成完全纯色的图像和背景，同时在颜色的鲜艳度和对比度上也有很大的提升。</p>
+<p>​ <img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/PlaygroundV25_color.png" alt="PlaygroundV2.5在色彩方面与其他模型比较"></p></li>
+</ul></li>
+<li><strong>生成多种宽高比图像(Generation Across Multiple Aspect
+Ratios)</strong>
+<ul>
+<li><p>【之前模型存在的问题】:</p>
+<p>​
+之前Diffusion图像生成模型普遍在方图上进行训练，理论上在推理时是适用于任何输入分辨率，即使它没有在特定分辨率上进行训练，这主要是得益于卷积神经网络的转移不变性。可是正如<a target="_blank" rel="noopener" href="https://blog.novelai.net/novelai-improvements-on-stable-diffusion-e10d38db82ac">NovelAI</a>指出的那样，在实践中当仅在方形图像上训练时，扩散模型并不能很好地推广到其他宽高比图像的生成。</p>
+<p>​ NovelAI和SDXL模型为了解决该问题则提出了桶采样(Bucketed
+Sampling)，即具有相近宽高比的图像被放在一个batch中送入模型，此外SDXL为了让模型更好地感知输入图像的分辨率，还额外输入了原图和目标图的size，有兴趣的也可以见<a target="_blank" rel="noopener" href="https://qzq2514.github.io/2023/05/20/Diffusion学习5-高质量文生图模型/#多尺度宽高比训练">我之前的博客</a>。</p>
+<p>​
+然而上述的桶采样也并非能完美解决该问题，主要SDXL数据集中宽高比桶的分布仍然是不平衡的，即数据集的大多数图像仍然都是方形的，所以最终推理时非方形图像仍然比方形的质量低得多。</p></li>
+<li><p>【本论文的解决方法】：</p>
+<p>​
+PlaygroundV2.5总体上还是遵循了类似于SDXL的桶采样策略，但是精心设计了数据流程以确保在各种宽高比下能够达到更好的采样，并最终帮助模型不偏向于某一种宽高比。</p></li>
+<li><p>【达到的效果】：</p>
+<p>在与SDXL和PlaygroundV2对比，本文的PlaygroundV2.5的prompt-image对齐性更好，生成的图像更满足prompt中的细节描述(如下图中虚线框的prompt)，同时在细节上也更好。</p>
+<figure>
+<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/PlaygroundV25_Multiple_Aspect_Ratios.png" alt="PlaygroundV2.5在多宽高比生成方面与其他模型比较">
+<figcaption aria-hidden="true">PlaygroundV2.5在多宽高比生成方面与其他模型比较</figcaption>
+</figure></li>
+</ul></li>
+<li><strong>人类偏好对齐(Human Preference Alignment)</strong>
+<ul>
+<li><p>【之前模型存在的问题】:</p>
+<p>​
+人类对手、脸、身体等人类特征的视觉错误特别敏感且容错度比较低。如果人脸畸形或身体结构扭曲，那么即便人像之外的画面具有完美照明、构图和风格，该图像仍然大概率会被评为低质量。</p>
+<p>​
+之前的生成模型，无论是语言还是图像，都容易产生幻觉。在图像模型中，这可能表现为畸形的人类特征。产生该问题的原因有很多，但一个明显的解释是训练目标不一致：生成模型的训练是为了最大化log-likelihood，而不是最大化人类偏好。</p></li>
+<li><p>【本论文的解决方法】：</p>
+<p>​
+在LLM中，将预训练的生成模型与人类偏好对齐的一种常见策略称为监督微调(即SFT)。SFT使用小但非常高质量的数据集对预训练的基础模型进行微调。这种简单的技术通常优于RLHF等更复杂的方法[33]。</p>
+<p>​ Playground
+v2.5的目标之一是尽可能降低人类特征中出现视觉错误的可能性。<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2309.15807">Emu</a>为T2I模型引入了一种类似于SFT的对齐策略。受<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2309.15807">Emu</a>的启发，PlaygroundV2.5开发了一个系统，使我们能够通过用户的评级从多个数据来源构造高质量的数据集。然后采用了一种迭代的、人为控制的循环方法来选择最佳的数据集候选者。</p></li>
+<li><p>【达到的效果】：</p>
+<p>​
+通过上述粗略介绍的对齐方法，playgroundv2.5号称在人脸细节、眼球形状、头发纹理、整体灯光等方面具有更好的效果。</p>
+<figure>
+<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/PlaygroundV25_human.png" alt="PlaygroundV2.5在人像细节生成方面与其他模型比较">
+<figcaption aria-hidden="true">PlaygroundV2.5在人像细节生成方面与其他模型比较</figcaption>
+</figure></li>
+</ul></li>
+</ul></li>
+<li><p><strong>与其他先进模型的效果对比：</strong></p>
+<figure>
+<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/PlaygroundV25_compare.png" alt="PlaygroundV2.5与其他优秀图像生成模型的总体比较">
+<figcaption aria-hidden="true">PlaygroundV2.5与其他优秀图像生成模型的总体比较</figcaption>
+</figure></li>
+</ul>
 <h2 id="playground-v3">Playground v3</h2>
-<p>《Playground v3: Improving Text-to-Image Alignment with Deep-Fusion
-Large Language Models》</p>
+<p>《<strong>Playground v3:</strong> Improving Text-to-Image Alignment
+with Deep-Fusion Large Language Models》</p>
 <p>【<a target="_blank" rel="noopener" href="https://playground.com/pg-v3">主页</a>】【<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2409.10695">论文</a>】</p>
+<figure>
+<img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/PlaygroundV3.png" alt="PlaygroundV3流程">
+<figcaption aria-hidden="true">PlaygroundV3流程</figcaption>
+</figure>
+<ul>
+<li><p><strong>算法流程：</strong>PlaygroundV3是对前版本PlaygroundV2.5的升级，在text-encoder、backbone和VAE的主要架构上都做了改进，并使用了<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2403.05135">ELLA</a>技术增强了image-text
+alignment
+能力；其次内部设计了一个caption模型，能够精准描述图像中多种级别的细节信息；应用场景包括贴纸、海报、logo等各种艺术设计；功能上在图像真实度、文字渲染生成、指令跟随、颜色控制、多语种生成等均有极大的效果提升；</p>
+<ul>
+<li><strong>Text-encoder方面：</strong>抛弃T5和CLIP而使用decoder-only架构的<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.21783">Llama3-8B</a>模型作为text-condition</li>
+<li><strong>Backbone方面：</strong>也是从<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.21783">Llama3-8B</a>架构(也是DiT结构)作为初始化，参数量24B</li>
+<li><strong>VAE方面：</strong>提升VAE模型的latent通道和分辨率，增强其重构能力</li>
+</ul></li>
+<li><p><strong>算法细节：</strong></p>
+<ul>
+<li><p><strong>Captioning Model</strong></p>
+<p>专门开发了一个caption模型，包含一个vision encoder,
+一个vision-language adapter, 和一个decoder-only的language
+model。并且作者认为高分辨率的vision
+encoder更有助于捕捉图像的细节信息。</p></li>
+<li><p><strong>Text Encoder</strong></p>
+<p>​
+之前对于传统T2I模型text-encoder的改进，要么使用LLM模型替换普遍使用的T5或CLIP模型，要么使用LLM对prompt进行改写以更加适配预训练好的T5或CLIP模型。本算法使用前者：直接抛弃T5和CLIP模型而单独使用<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.21783">Llama3-8B</a>作为初始权重进行训练。</p>
+<p>​
+Transformer模型在不同的层能够捕捉不同级别的语义(word-level或者sentence-level)，但是由于LLM模型的庞大和复杂，想要在其中找到最优的transformer层作为text-encoder特征是并不容易的。</p>
+<p>​
+作者认为LLM模型具有强大的生成能力，主要在于信息和特征在其内的流动具有完整和连续性，其中的知识跨越了所有layer，并非是某一层的特征就能完整概括的。</p>
+<p>​
+所以受此启发，作者在t2i模型时复制了LLM的所有transformer-block。这种设计允许模型将LLM中每个hidden
+embedding
+outputs作为t2i模型相应层的条件输入，能够充分利用LLM完整的“thinking
+process”。最终帮助模型在生成图像时实现了精准的prompt跟随和prompt连贯性能力。</p>
+<blockquote>
+<p><strong>回顾与对比：</strong>之前的T2I模型则是单独使用T5/CLIP的输出层或者倒数第二层作为text
+ebbedding，并且将这个特征复制后分别送到所有的UNet层中，而本文的PlaygroundV3则是LLM不同layer的text-embedding送到image
+model对应的层。</p>
+</blockquote></li>
+<li><p><strong>Model Structure</strong></p>
+<p>​
+PlaygroundV3的图像生成的backbone采用DiT结构，完全复制Llama3-8B的transformer结构，包括hidden
+embedding尺寸, attention heads数量, attention heads
+维度等。在训练过程中冻住LLM部分只训练图像部分的模型。在推理时LLM只需要推理一次得到所有中间状态特征就行。</p>
+<p>​
+PlaygroundV3图像模型的每个tranformer-block只包含一个atttention层和一个feed-forward层，具体做法正如流程图所示：在得到image
+feature的QKV和text
+embedding的QKV时，将两者的K、V对应拼接得到新的K、V后再配合用image
+feature的Q进行最终的attention。通过该操作能够将原SD或SDXL模型中的self-attention和cross-attention合并成一个attention，减少计算量。</p>
+<blockquote>
+<p>​
+<strong>回顾：</strong>原SD和SDXL架构中每个transformer-block包含一个self-attention(图像特征自己的QKV)，一个cross-attention(图像特征的Q和text
+embedding的K、V)和一个feed-forward。</p>
+</blockquote>
+<p>​ 此外模型还使用了以下一些技巧提升最终图像模型的生成能力:</p>
+<ul>
+<li><p><strong>U-Net skip connections between</strong>
+<strong>transformer</strong>
+<strong>blocks:</strong>模仿UNet在transformer
+blocks之间使用跳跃连接。</p></li>
+<li><p><strong>Token</strong> <strong>down-sampling at middle
+layers:</strong>在所有共32层的transformer
+block中，对image特征的K和V也做了4倍下采样，提升训练和推理速度且发现对最终的生成质量没有影响。</p></li>
+<li><p><strong>Positional embedding</strong>:使用<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.09864">Rotary Position
+Embedding(RoPE)</a>进行位置编码。具体探索了两种变体:</p>
+<ol type="1">
+<li><p>interpolating-PE：
+保证起始和结束位置ID保持固定，而不管序列长度如何，并在其间插值位置ID——SD3和其他模型采用了这一想法。</p></li>
+<li><p>expand-PE：根据序列长度成比例增加位置ID，不应用任何技巧或归一化（即传统位置嵌入）。</p>
+<p>最终作者发现“interpolating-PE”有一个明显的缺点：会导致模型在训练分辨率上严重过拟合，无法推广到未见过的宽高比。相比之下，“expand-PE”方法表现更好，没有显示出分辨率过拟合的情况。因此最终选择使用传统的位置嵌入。</p></li>
+</ol></li>
+</ul></li>
+<li><p><strong>New</strong> <strong>VAE</strong></p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2309.15807">Emu</a>将VAE的latent通道数从SD/SDXL中的4增加到了16，提升了诸如小单词和小字的生成效果。借鉴该方法，PlaygroundV3也将通道数提升到了16并且分辨率从256增加到了512。</p>
+<blockquote>
+<p>此外作者还做了一些探索:</p>
+<ol type="1">
+<li>借鉴<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2309.15807">Emu</a>中的frequency
+method训练VAE但是没有效果提升</li>
+<li>使用CLIP 的image encoder 或者DINOv2 的encoder
+作为VAE的encoder，虽然重建效果有提升但是配合上diffusion生成后效果都没有提升甚至会导致不稳定。</li>
+</ol>
+</blockquote></li>
+</ul></li>
+<li><p><strong>模型训练：</strong></p>
+<ul>
+<li><p><strong>Noise schedule：</strong>和PlaygroundV2.5一样，仍然使用<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2206.00364">EDM算法</a></p></li>
+<li><p><strong>Multiple Aspect-Ratio
+Support：</strong>也采用了和PlaygroundV2.5一样的策略</p></li>
+<li><p><strong>Multi-Level Captions per
+Image：</strong>团队内部训练了一个Vision Large Language Model (VLM)
+用于对图像caption，能够对图像中高细节的部分进行描述(比如小物体、光照、风格和纹理)，记作PG
+Captioner。此外该caption模型能够生成详细程度不同(即6种长度)的描述语句。利用该caption模型在训练T2I模型的时候随机选取其中一个作为text
+condition。该机制能够帮助模型在少量数据SFT的时候不会发生过拟合，同时在推理的时候也能够在即便输入很短prompt的时候，保证生成图像的多样性。</p></li>
+<li><p><strong>Training
+stability：</strong>作者在模型训练的后期观察到损失峰值(表现为损失很大但是没有NaN)，这导致模型无法生成有意义的图像。尝试了几种方法，包括降低Adam优化器的beta值、梯度剪裁和降低学习率。但是都没效果。最终，作者使用以下方法进行解决：</p>
+<p>​
+在训练过程的每个iteration下都遍历了所有参数的梯度，并计算了梯度超过规定的梯度阈值的数量。如果这次training
+iteration下大梯度参数的数量超过预定义的计数阈值，就停止这次iteration的参数更新直接开始下一次iteration的训练。</p></li>
+<li><p><strong>该方法与梯度剪裁的区别：</strong>梯度剪裁不足以避免模型权重在出现异常值时的影响，其只会减小梯度的大小，但不会改变权重更新的方向，因此网络权重仍有可能坍塌。而通过丢弃整批梯度则能避免这种风险，并确保模型保持在稳定的训练轨迹上。</p></li>
+</ul></li>
+<li><p><strong>其他：</strong></p>
+<ul>
+<li><p><strong>DPG-bench:</strong></p>
+<p>​ 受DSG和<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2403.05135">DPG
+bench</a>的启发，提出了一种用于image
+caption评估的反向方法。基于图像构建17个类别的“是-否”问答对：一般问题、图像类型、文本、颜色、位置、关系、相对位置、实体、实体大小、实体形状、数量、情感、模糊、图像伪影、专有名词、调色板和颜色分级。</p>
+<p>​
+具体评估过程中，使用LLM来回答“Yes”、“No”或“N/A”（当无法回答问题时）。然后将答案与参考答案进行比较，以计算结果的准确性。</p>
+<p>​ 最终构建了由200张图片和2471个问题构成的caption
+benchmark-CapsBench1，平均每张图片有12个问题。其中图像包含电影场景、卡通场景、电影海报、邀请函、广告、休闲摄影、街头摄影、风景摄影和室内摄影等各种场景。</p></li>
+<li><p><strong>应用和优势：</strong></p>
+<ul>
+<li><strong>Photo-realism：</strong>在皮肤纹理等细节上的真实感优于Ideogram-2
+和Flux-Pro</li>
+<li><strong>Prompt-Following：</strong>指令跟随能力提升，即便在很长prompt上也能具有比较好的响应</li>
+<li><strong>Text
+Rendering：</strong>在海报、logo等具有很强的文字生成能力，82%
+的准确率高于Flux-pro的69%和Ideogram-2的75%</li>
+<li><strong>RGB</strong> <strong>Color
+Control：</strong>精确的颜色控制能力，能控制图像中指定部分具有指定的颜色</li>
+<li><strong>Multilingual Prompt
+Input</strong>：支持多语种prompt输入</li>
+</ul></li>
+</ul></li>
+</ul>
 </article><section class="jump-container is-flex is-justify-content-space-between my-6"><!-- em is empty placeholder--><a class="button is-default" href="/2023/06/10/Diffusion%E5%AD%A6%E4%B9%A06-%E7%94%9F%E6%88%90%E5%8F%AF%E6%8E%A7%E6%80%A7/" title="Diffusion学习6-生成可控性"><i class="iconfont icon-prev mr-2 has-text-grey"></i><span class="has-text-weight-semibold">Previous: Diffusion学习6-生成可控性</span></a><a class="button is-default" href="/2023/04/22/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E5%AF%B9%E7%99%BD%E8%86%9CMesh%E4%B8%8A%E8%89%B2(Texturify)/" title="论文笔记-对白膜Mesh上色(Texturify)"><span class="has-text-weight-semibold">Next: 论文笔记-对白膜Mesh上色(Texturify)</span><i class="iconfont icon-next ml-2 has-text-grey"></i></a></section><article class="mt-6 comment-container"><script async repo="qzq2514/qzq2514.github.io" src="https://utteranc.es/client.js" issue-term="pathname" theme="preferred-color-scheme"></script></article></div></div></main></main><footer class="is-flex is-flex-direction-column is-align-items-center is-flex-shrink-0 is-family-serif"><section class="sns-container"><a title="twitter" target="_blank" rel="noopener nofollow" href="//twitter.com/qzq2514"><i class="iconfont icon-twitter"></i></a><!-- Github--><a title="github" target="_blank" rel="noopener nofollow" href="//github.com/qzq2514"><i class="iconfont icon-github"></i></a><!-- Ins--><a title="instagram" target="_blank" rel="noopener nofollow" href="//www.instagram.com/qzq2514"><i class="iconfont icon-ins"></i></a><!-- publish--><a title="publish" target="_blank" rel="noopener nofollow" href="https://blog.csdn.net/qzq2514"><i class="iconfont icon-rss"></i></a><!-- RSS--><!-- 知乎--><a title="zhihu" target="_blank" rel="noopener nofollow" href="//zhihu.com/people/qi-zhong-qi-62"><i class="iconfont icon-zhihu"></i></a><!-- 领英--><!-- 脸书--></section><p><span>Copyright ©</span><span> Georgeqi 2024</span></p><div class="is-flex is-justify-content-center is-flex-wrap-wrap"></div><div><span></span></div></footer><script async defer src="https://buttons.github.io/buttons.js"></script><script src="/js/jquery-3.6.1.min.js"></script><script src="/js/jquery-fancybox.min.js"></script><script src="/js/img_zoom.js"></script><script src="/js/post.js"></script></body></html>
