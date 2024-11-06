@@ -648,24 +648,26 @@ aesthetic quality in text-to-image generation》</p>
 <li><p><strong>算法流程：</strong>本论文未介绍具体的模型框架和训练细节，更多像是一个简略的技术报告，从三个维度来提升文生图的质量：鲜艳颜色和对比度、多分辨率生成、人像细节。最终通过user
 study的方式表明新提出的Playground
 v2.5战胜了之前各种先进的开源和闭源文生图模型，诸如Midjourney 5.2、DALL·E
-3、Playground v2 [20]、PIXART-α和SDXL。</p></li>
+3、Playground v2、PIXART-α和SDXL。</p></li>
 <li><p><strong>算法细节：</strong></p>
 <ul>
-<li><strong>提升颜色和对比度(enhancing color and contrast )</strong>
+<li><strong>提升颜色和对比度(enhancing color and contrast)</strong>
 <ul>
-<li><p>【之前模型存在的问题】：SDXL仍然难以生成纯色的图片或者纯色背景的图片(具体可见<a target="_blank" rel="noopener" href="https://qzq2514.github.io/2023/05/20/Diffusion学习5-高质量文生图模型/#训练-1">之前的博客</a>)，而<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2305.08891">这篇论文</a>指出该问题的主要原因在于：在diffusion扩散过程中，即使离散的噪声水平达到最大值，但是stable
+<li><p>【之前模型存在的问题】</p>
+<p>​ SDXL仍然难以生成纯色的图片或者纯色背景的图片(具体可见<a target="_blank" rel="noopener" href="https://qzq2514.github.io/2023/05/20/Diffusion学习5-高质量文生图模型/#训练-1">之前的博客</a>)，而<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2305.08891">这篇论文</a>指出该问题的主要原因在于：在diffusion扩散过程中，即使离散的噪声水平达到最大值，但是stable
 diffusion的信噪比仍然太高了(即不是完全的纯噪声)。虽然SDXL和PlaygroundV2.5的前一个版本(Playground
 v2)中都尝试使用了<a target="_blank" rel="noopener" href="https://www.crosslabs.org/blog/diffusion-with-offset-noise">noise-offset</a>的方式来缓解这个问题，但是该问题仍然没有被彻底解决。</p></li>
-<li><p>【本论文的解决方法】PlaygroundV2.5则使用了<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2206.00364">EDM算法</a>来解决这个问题，该算法有两个明显的优点：</p>
+<li><p>【本论文的解决方法】</p>
+<p>PlaygroundV2.5则使用了<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2206.00364">EDM算法</a>来解决这个问题，该算法有两个明显的优点：</p>
 <ol type="1">
 <li><p>与<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2305.08891">Zero Terminal
-SNR</a>算法一样，EDM在最后一个去噪步骤达到了接近于零的信噪比。</p></li>
+SNR</a>一样，EDM在最后一个去噪步骤达到了接近于零的信噪比。</p></li>
 <li><p>EDM采用第一性原理方法来设计训练和采样过程，以及UNet的预处理。这能够帮助获得更好的图像质量和更快的模型收敛速度。</p>
-<p>想要更详细了解该算法的公式和细节，可去读原<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2206.00364">论文</a>。同时，playgroundv2.5还受到<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2301.11093">Simple
-diffusion</a>的启发，在对高分辨率图像进行训练时，将noise
+<p>想更详细了解该算法的公式和细节可去读原<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2206.00364">论文</a>。同时playgroundv2.5还受到<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2301.11093">Simple
+diffusion</a>启发，在对高分辨率图像进行训练时将noise
 schedule向整体噪声更大的方向倾斜。</p></li>
 </ol></li>
-<li><p>【达到的效果】：</p>
+<li><p>【达到的效果】</p>
 <p>在与SDXL和PlaygroundV2对比，本文的PlaygroundV2.5能够根据
 Prompt生成完全纯色的图像和背景，同时在颜色的鲜艳度和对比度上也有很大的提升。</p>
 <p>​ <img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/PlaygroundV25_color.png" alt="PlaygroundV2.5在色彩方面与其他模型比较"></p></li>
@@ -673,17 +675,17 @@ Prompt生成完全纯色的图像和背景，同时在颜色的鲜艳度和对�
 <li><strong>生成多种宽高比图像(Generation Across Multiple Aspect
 Ratios)</strong>
 <ul>
-<li><p>【之前模型存在的问题】:</p>
+<li><p>【之前模型存在的问题】</p>
 <p>​
 之前Diffusion图像生成模型普遍在方图上进行训练，理论上在推理时是适用于任何输入分辨率，即使它没有在特定分辨率上进行训练，这主要是得益于卷积神经网络的转移不变性。可是正如<a target="_blank" rel="noopener" href="https://blog.novelai.net/novelai-improvements-on-stable-diffusion-e10d38db82ac">NovelAI</a>指出的那样，在实践中当仅在方形图像上训练时，扩散模型并不能很好地推广到其他宽高比图像的生成。</p>
 <p>​ NovelAI和SDXL模型为了解决该问题则提出了桶采样(Bucketed
 Sampling)，即具有相近宽高比的图像被放在一个batch中送入模型，此外SDXL为了让模型更好地感知输入图像的分辨率，还额外输入了原图和目标图的size，有兴趣的也可以见<a target="_blank" rel="noopener" href="https://qzq2514.github.io/2023/05/20/Diffusion学习5-高质量文生图模型/#多尺度宽高比训练">我之前的博客</a>。</p>
 <p>​
 然而上述的桶采样也并非能完美解决该问题，主要SDXL数据集中宽高比桶的分布仍然是不平衡的，即数据集的大多数图像仍然都是方形的，所以最终推理时非方形图像仍然比方形的质量低得多。</p></li>
-<li><p>【本论文的解决方法】：</p>
+<li><p>【本论文的解决方法】</p>
 <p>​
 PlaygroundV2.5总体上还是遵循了类似于SDXL的桶采样策略，但是精心设计了数据流程以确保在各种宽高比下能够达到更好的采样，并最终帮助模型不偏向于某一种宽高比。</p></li>
-<li><p>【达到的效果】：</p>
+<li><p>【达到的效果】</p>
 <p>在与SDXL和PlaygroundV2对比，本文的PlaygroundV2.5的prompt-image对齐性更好，生成的图像更满足prompt中的细节描述(如下图中虚线框的prompt)，同时在细节上也更好。</p>
 <figure>
 <img src="/2023/05/20/Diffusion%E5%AD%A6%E4%B9%A05-%E9%AB%98%E8%B4%A8%E9%87%8F%E6%96%87%E7%94%9F%E5%9B%BE%E6%A8%A1%E5%9E%8B/PlaygroundV25_Multiple_Aspect_Ratios.png" alt="PlaygroundV2.5在多宽高比生成方面与其他模型比较">
@@ -692,17 +694,17 @@ PlaygroundV2.5总体上还是遵循了类似于SDXL的桶采样策略，但是�
 </ul></li>
 <li><strong>人类偏好对齐(Human Preference Alignment)</strong>
 <ul>
-<li><p>【之前模型存在的问题】:</p>
+<li><p>【之前模型存在的问题】</p>
 <p>​
 人类对手、脸、身体等人类特征的视觉错误特别敏感且容错度比较低。如果人脸畸形或身体结构扭曲，那么即便人像之外的画面具有完美照明、构图和风格，该图像仍然大概率会被评为低质量。</p>
 <p>​
 之前的生成模型，无论是语言还是图像，都容易产生幻觉。在图像模型中，这可能表现为畸形的人类特征。产生该问题的原因有很多，但一个明显的解释是训练目标不一致：生成模型的训练是为了最大化log-likelihood，而不是最大化人类偏好。</p></li>
-<li><p>【本论文的解决方法】：</p>
+<li><p>【本论文的解决方法】</p>
 <p>​
 在LLM中，将预训练的生成模型与人类偏好对齐的一种常见策略称为监督微调(即SFT)。SFT使用小但非常高质量的数据集对预训练的基础模型进行微调。这种简单的技术通常优于RLHF等更复杂的方法[33]。</p>
 <p>​ Playground
 v2.5的目标之一是尽可能降低人类特征中出现视觉错误的可能性。<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2309.15807">Emu</a>为T2I模型引入了一种类似于SFT的对齐策略。受<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2309.15807">Emu</a>的启发，PlaygroundV2.5开发了一个系统，使我们能够通过用户的评级从多个数据来源构造高质量的数据集。然后采用了一种迭代的、人为控制的循环方法来选择最佳的数据集候选者。</p></li>
-<li><p>【达到的效果】：</p>
+<li><p>【达到的效果】</p>
 <p>​
 通过上述粗略介绍的对齐方法，playgroundv2.5号称在人脸细节、眼球形状、头发纹理、整体灯光等方面具有更好的效果。</p>
 <figure>
