@@ -628,7 +628,7 @@ mjx-container[display="true"] + br {
 <li><p><strong>流程介绍：</strong>Flux模型具有生成双联画(diptychs)能力，该能力可以保证左右两个图像具有某种联系(如主体一致、风格一致等)。本文算法基于此先验提出了一种training-free的主体驱动生成方法[计作Diptych Prompting，即双联画prompting]，是一种inpainting-based的方法，通过图像拼接的形式以左侧的图像作为引导并在右侧生成具有相同主体/风格的结果。此外算法在生成过程中通过attention权重加强的技巧进一步提升主体的细节保持。</p>
 </li>
 <li><p><strong>Diptych Generation能示意图：</strong></p>
-<p>从下图可以看到，flux模型的双联画生成能力是最好的，其能够较好保证两个画面中的主体一致性：<img src="/./Diptych-compare.png" alt="各种文生图模型的双联画生成能力展示"></p>
+<p>从下图可以看到，flux模型的双联画生成能力是最好的，其能够较好保证两个画面中的主体一致性：<img src="/./Diptych-compare.png" alt="各种文生图模型的双联画能力"></p>
 </li>
 </ul>
 </li>
@@ -648,7 +648,7 @@ mjx-container[display="true"] + br {
 </li>
 </ol>
 </li>
-<li><p><strong>Reference Attention Enhancement：</strong></p>
+<li><p>*<em>Reference Attention Enhancement：</em></p>
 <p>​	为保证在inpainting右侧的时候能够完美捕捉左侧图像的细节信息，作者在attention上做出了增强。</p>
 <p>​	原网络中的attention是连接图像中两两部分的特征进行信息交互，但是这里是拼成一整张图送到网络中，并且其实对生成我们真正想要的结果(即生成的右半部分)，有帮助的是“左侧inference图像对右侧图像的影响”，论文原话是：</p>
 <pre><code>This leads us to enhance reference attention−the influ- ence of the left panel on the
@@ -661,7 +661,7 @@ right−to better capture granular details of the reference subject.
 </li>
 <li><p><strong>实验细节：</strong></p>
 <ul>
-<li>整个算法无训练细节，推理时候使用<a target="_blank" rel="noopener" href="https://huggingface.co/black-forest-labs/FLUX.1-dev">Flux-Dev</a>作为骨干网络，使用<a target="_blank" rel="noopener" href="https://huggingface.co/alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Beta">ControlNet-Inpaining</a>作为inpainting控制插件</li>
+<li>整个算法无训练细节，推理使用<a target="_blank" rel="noopener" href="https://huggingface.co/black-forest-labs/FLUX.1-dev">Flux-Dev</a>作为骨干网络，使用<a target="_blank" rel="noopener" href="https://huggingface.co/alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Beta">ControlNet-Inpaining</a>作为inpainting插件</li>
 <li>拼图大小为768×1536，ControlNet 控制力度为0.95，cfg为3.5，推理步数为30步</li>
 <li>本文提出的reference attention控制权重为1.3</li>
 </ul>
@@ -736,6 +736,6 @@ right−to better capture granular details of the reference subject.
 </ul>
 </li>
 </ul>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本章节主要介绍了AIGC下对生成结果进行特征保持的算法，主要包括通用物体特征的<a target="_blank" rel="noopener" href="https://ip-adapter.github.io/">IP-Adapter</a>、<a target="_blank" rel="noopener" href="https://ali-vilab.github.io/AnyDoor-Page/">AnyDoor</a>、<a target="_blank" rel="noopener" href="https://jiangyzy.github.io/CustomNet/">CustomNet</a>、<a target="_blank" rel="noopener" href="https://corleone-huang.github.io/realcustom/">RealCustom</a>然后对于特征保持下一个重要的分支-“人脸ID保持”又重点介绍了三篇论文<a target="_blank" rel="noopener" href="https://photo-maker.github.io/">PhotoMaker</a>、<a target="_blank" rel="noopener" href="https://instantid.github.io/">InstantID</a>、<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2404.16022">PuLID</a>，最后还介绍了基于当前先进的文生图模型Flux下两个简单有效的特征保持生成方法<a target="_blank" rel="noopener" href="https://ali-vilab.github.io/In-Context-LoRA-Page/">Diptych Prompting</a>和<a target="_blank" rel="noopener" href="https://ali-vilab.github.io/In-Context-LoRA-Page/">In-Context LoRA</a></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本章节主要介绍了AIGC下对生成结果进行特征保持的算法，主要包括通用物体特征的<a target="_blank" rel="noopener" href="https://ip-adapter.github.io/">IP-Adapter</a>、<a target="_blank" rel="noopener" href="https://ali-vilab.github.io/AnyDoor-Page/">AnyDoor</a>、<a target="_blank" rel="noopener" href="https://jiangyzy.github.io/CustomNet/">CustomNet</a>、<a target="_blank" rel="noopener" href="https://corleone-huang.github.io/realcustom/">RealCustom</a>然后对于特征保持下一个重要的分支-“人脸ID保持”又重点介绍了三篇论文<a target="_blank" rel="noopener" href="https://photo-maker.github.io/">PhotoMaker</a>、<a target="_blank" rel="noopener" href="https://instantid.github.io/">InstantID</a>、<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2404.16022">PuLID</a>，最后还介绍了基于当前先进的文生图模型Flux下两个简单有效的特征保持生成方法<a target="_blank" rel="noopener" href="https://ali-vilab.github.io/In-Context-LoRA-Page/">Diptych Prompting</a>和<a target="_blank" rel="noopener" href="https://ali-vilab.github.io/In-Context-LoRA-Page/">In-Context LoRA</a>。</p>
 <p>这类算法相比较以<a target="_blank" rel="noopener" href="https://dreambooth.github.io/">DreamBooth</a>、<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2106.09685">LoRA</a>、<a target="_blank" rel="noopener" href="https://textual-inversion.github.io/">Textual Inversion</a>等为代表的算法不仅训练成本低，效果也有一定提升。</p>
 </article><section class="jump-container is-flex is-justify-content-space-between my-6"><!-- em is empty placeholder--><a class="button is-default" href="/2024/09/22/Diffusion%E5%AD%A6%E4%B9%A09-%E9%A3%8E%E6%A0%BC%E8%BF%81%E7%A7%BB/" title="Diffusion学习9-风格迁移"><i class="iconfont icon-prev mr-2 has-text-grey"></i><span class="has-text-weight-semibold">Previous: Diffusion学习9-风格迁移</span></a><a class="button is-default" href="/2024/06/30/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E9%98%B4%E5%BD%B1%E7%94%9F%E6%88%90(Shadow%20Generation)/" title="论文笔记-阴影生成"><span class="has-text-weight-semibold">Next: 论文笔记-阴影生成</span><i class="iconfont icon-next ml-2 has-text-grey"></i></a></section><article class="mt-6 comment-container"><script async repo="qzq2514/qzq2514.github.io" src="https://utteranc.es/client.js" issue-term="pathname" theme="preferred-color-scheme"></script></article></div></div></main></main><footer class="is-flex is-flex-direction-column is-align-items-center is-flex-shrink-0 is-family-serif"><section class="sns-container"><a title="twitter" target="_blank" rel="noopener nofollow" href="//twitter.com/qzq2514"><i class="iconfont icon-twitter"></i></a><!-- Github--><a title="github" target="_blank" rel="noopener nofollow" href="//github.com/qzq2514"><i class="iconfont icon-github"></i></a><!-- Ins--><a title="instagram" target="_blank" rel="noopener nofollow" href="//www.instagram.com/qzq2514"><i class="iconfont icon-ins"></i></a><!-- publish--><a title="publish" target="_blank" rel="noopener nofollow" href="https://blog.csdn.net/qzq2514"><i class="iconfont icon-rss"></i></a><!-- RSS--><!-- 知乎--><a title="zhihu" target="_blank" rel="noopener nofollow" href="//zhihu.com/people/qi-zhong-qi-62"><i class="iconfont icon-zhihu"></i></a><!-- 领英--><!-- 脸书--></section><p><span>Copyright ©</span><span> Georgeqi 2025</span></p><div class="is-flex is-justify-content-center is-flex-wrap-wrap"></div><div><span></span></div></footer><script async defer src="https://buttons.github.io/buttons.js"></script><script src="/js/jquery-3.6.1.min.js"></script><script src="/js/jquery-fancybox.min.js"></script><script src="/js/img_zoom.js"></script><script src="/js/post.js"></script></body></html>
