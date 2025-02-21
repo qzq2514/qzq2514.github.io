@@ -36,17 +36,24 @@ TEXTure算法流程
 该算法借助当前在2D图像领域大火的Diffusion技术，在视角空间对mesh前景生成纹理，然后通过可微分渲染的方式的方式将视角空间的纹理一点点&quot;贴&quot;回mesh
 算法细节：
 
-首先要知道的是:..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2023/04/22/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E5%AF%B9%E7%99%BD%E8%86%9CMesh%E4%B8%8A%E8%89%B2(Texturify)/">Read more</a></section></article><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/ImprovedDDPM_figure3.png" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/31/Diffusion%E5%AD%A6%E4%B9%A04-%E6%95%88%E6%9E%9C%E5%92%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87/"><img class="post-cover-img js-img-fadeIn" src="/ImprovedDDPM_figure3.png" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/31/Diffusion%E5%AD%A6%E4%B9%A04-%E6%95%88%E6%9E%9C%E5%92%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87/">Diffusion学习4-效果和性能提升</a></h2><time class="has-text-grey" datetime="2022-12-31T14:10:22.000Z">2022-12-31</time><p class="is-flex-grow-2 mt-2">下述效果的具体代码见: qzq2514/Diffusion
-效果提升这里简单实验和讨论了在训练DDPM过程中使用的损失函数(L1或L2损失)，并且实验了Improved DDPM 中提到的Cosine Beta Schedule带来的效果提升。
-Cosine Beta Schedule首先回顾下DDPM在前向过程中的一个重要公式-利用重采样技巧从直接得到，即Diffusion学习2-理论推导中的公式(3):而且在原DDPM论文中使用的线性Beta采样，即:
+首先要知道的是:..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2023/04/22/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0-%E5%AF%B9%E7%99%BD%E8%86%9CMesh%E4%B8%8A%E8%89%B2(Texturify)/">Read more</a></section></article><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/31/Diffusion%E5%AD%A6%E4%B9%A04-%E6%95%88%E6%9E%9C%E5%92%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87/ImprovedDDPM_figure3.png" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/31/Diffusion%E5%AD%A6%E4%B9%A04-%E6%95%88%E6%9E%9C%E5%92%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/31/Diffusion%E5%AD%A6%E4%B9%A04-%E6%95%88%E6%9E%9C%E5%92%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87/ImprovedDDPM_figure3.png" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/31/Diffusion%E5%AD%A6%E4%B9%A04-%E6%95%88%E6%9E%9C%E5%92%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87/">Diffusion学习4-效果和性能提升</a></h2><time class="has-text-grey" datetime="2022-12-31T14:10:22.000Z">2022-12-31</time><p class="is-flex-grow-2 mt-2">下述效果的具体代码见: qzq2514/Diffusion
+效果提升
+这里简单实验和讨论了在训练DDPM过程中使用的损失函数(L1或L2损失)，并且实验了Improved
+DDPM 中提到的Cosine Beta Schedule带来的效果提升。
+Cosine Beta Schedule
+首先回顾下DDPM在前向过程中的一个重要公式-利用重采样技巧从直接得到，即Diffusion学习2-理论推导中的公式(3):
+ 而且在原DDPM论文中使用的线性Beta采样，即:
 torch.linspace(start=0.0001, end=0.02, steps=100)
+Improved
+DDPM则进一步分析了这种Beta设计的缺点，取出论文中的图3和图5:
 
-Improved DDPM则进一步分析了这种Beta设计的缺点，取出论文中的图3和图5:
 
 
 
-Linear和Cosine的Beta方式对于加噪的影响
-..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/31/Diffusion%E5%AD%A6%E4%B9%A04-%E6%95%88%E6%9E%9C%E5%92%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87/">Read more</a></section></article><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/20221228191848_StyleGAN_face_size128_225_progress.jpg" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/20221228191848_StyleGAN_face_size128_225_progress.jpg" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/">Diffusion学习3-代码实践</a></h2><time class="has-text-grey" datetime="2022-12-25T13:27:59.000Z">2022-12-25</time><p class="is-flex-grow-2 mt-2">先放一张在人脸数据集上训练好后去噪的可视化过程
+
+
+
+Linear和Cosine的Beta方式对..</p><a class="button is-default mt-2 has-text-weight-semibold" href="/2022/12/31/Diffusion%E5%AD%A6%E4%B9%A04-%E6%95%88%E6%9E%9C%E5%92%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87/">Read more</a></section></article><article class="post-item-card"><header class="is-relative is-flex"><div class="post-cover-backdrop is-hidden"><img src="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/20221228191848_StyleGAN_face_size128_225_progress.jpg" alt="loading.."></div><a class="post-cover-link has-text-centered skeleton" href="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/"><img class="post-cover-img js-img-fadeIn" src="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/20221228191848_StyleGAN_face_size128_225_progress.jpg" alt="loading.." data-backdrop="true"></a></header><section class="content post-card-content p-4 pb-5"><header><a href="/tags/Diffusion"><i class="tag post-item-tag">Diffusion</i></a></header><h2 class="mt-4 mb-0 is-family-serif"><a href="/2022/12/25/Diffusion%E5%AD%A6%E4%B9%A03-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/">Diffusion学习3-代码实践</a></h2><time class="has-text-grey" datetime="2022-12-25T13:27:59.000Z">2022-12-25</time><p class="is-flex-grow-2 mt-2">先放一张在人脸数据集上训练好后去噪的可视化过程
 
 
 DDPM可视化去噪
